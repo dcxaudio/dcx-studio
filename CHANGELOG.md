@@ -2,6 +2,8 @@
 
 ## Próxima
 
+- **Corrigido:** digitar o nome do projeto (ou qualquer campo de texto) disparava notas e controles das máquinas. Com o foco num campo de texto, os atalhos de teclado de todas as máquinas ficam desligados e voltam ao sair do campo (`js/keyguard.js`). Nada mudou nos repositórios das máquinas.
+
 - **Barra inferior** fixa (logo, nome do projeto, VU do master, engrenagem) e **painel de config**: Audio (volume master, limitador, entrada e saida de audio, atalhos do MIDI geral: ligar, MIDI Learn, salvar/carregar/limpar o mapa, que continua o mesmo) e Projeto.
 - **Salvar e carregar projeto:** um `.zip` com um disquete JSON por aparelho (RJ-2000, RJ-950, RJ-42 e DCX 404, com os samples) e o `projeto.json`; cada aparelho tambem salva e carrega o proprio disquete. Novos: `js/bar.js`, `js/zip.js`, `css/bar.css`, `img/dcx-studio.svg`. Nenhum submodulo mudou.
 

@@ -220,13 +220,15 @@
       inp.type = "text"; inp.maxLength = 60; inp.value = projName; inp.setAttribute("aria-label", "Nome do projeto");
       nameEl.hidden = true; nameBtn.insertBefore(inp, nameEl.nextSibling); inp.focus(); inp.select();
       const done = ok => {
-        if (!inp.parentNode) return;
+        if (closed || !inp.parentNode) return;
+        closed = true;
         const v = inp.value.trim();
         if (ok && v) { projName = v.slice(0, 60); saveName(); }
         inp.remove(); nameEl.hidden = false; nameEl.textContent = projName;
       };
       inp.addEventListener("keydown", e => { if (e.key === "Enter") done(true); else if (e.key === "Escape") { e.stopPropagation(); done(false); } });
       inp.addEventListener("blur", () => done(true));
+      let closed = false;
     });
 
     /* ================================================================ os quatro aparelhos */
