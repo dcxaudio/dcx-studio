@@ -530,6 +530,7 @@
     <span class="sep"></span>
     <button class="proj" type="button" data-ctrl="projeto-nome" title="Renomear o projeto"><span class="lbl">Projeto</span><span class="name">Sem titulo</span><i class="dirty" title="Alteracoes nao salvas" hidden></i></button>
     <span class="sp"></span>
+    <label class="tape" title="Fita no master: satura toda a mistura. 0 = som igual"><span class="lbl">Tape</span><input id="bar-tape" data-ctrl="tape" type="range" min="0" max="100" value="0" aria-label="Tape (fita no master)"><output id="bar-tape-o">0</output></label>
     <div class="vu" data-ctrl="vu" aria-label="Nivel de saida" role="img"><div class="row"><b>L</b></div><div class="row"><b>R</b></div></div>
     <button class="cfg-btn" id="cfg-btn" type="button" data-ctrl="config" aria-expanded="false" aria-controls="cfg" aria-label="Configuracoes">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg>
@@ -542,8 +543,8 @@
   <input type="file" id="d4-file" accept="audio/*,.wav,.aif,.aiff,.mp3,.ogg,.flac,.m4a" hidden>
 
   <!-- dcx-core (vendor/dcx-core, v1.0.0) -->
-  <script src="vendor/dcx-core/js/dsp.js"></script>
   <script src="js/keyguard.js"></script>
+  <script src="vendor/dcx-core/js/dsp.js"></script>
   <script src="vendor/dcx-core/js/decode.js"></script>
   <script src="vendor/dcx-core/js/store.js"></script>
   <script src="vendor/dcx-core/js/output.js"></script>
@@ -566,6 +567,7 @@
   <script src="vendor/rj-2000/js/app.js"></script>
   <script src="js/layout.js"></script>
   <script src="js/zip.js"></script>
+  <script src="js/select.js"></script>
   <script src="js/bar.js"></script>
   <script>
     // DCX Studio: um host so ("studio"), com o rack completo. Cada aparelho recebe a vista dele.
@@ -624,6 +626,7 @@
       sp.seq.on("transport", followBpm);
       sp.seq.on("position", followBpm);
 
+      RJ.padSelect({ studio, sp, d404 });
       RJ.studio = studio; RJ.app = sp; RJ.d404 = d404;
       // barra inferior: master, VU, config de audio e MIDI, salvar/carregar projeto (js/bar.js)
       RJ.studioBar({ studio, sp, s950, r42, d404 });

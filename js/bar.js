@@ -32,11 +32,11 @@
     const cfgEl = $("#cfg"), cfgBtn = $("#cfg-btn");
 
     /* ================================================================ configuracao salva */
-    const cfg = { master: 100, limiter: true, input: "", output: "" };
+    const cfg = { master: 100, limiter: true, input: "", output: "", tape: 0 };
     const saveCfg = () => { studio.store.put("bar", JSON.stringify(cfg)); };
     const loaded = studio.store.get("bar").then(v => {
       try { Object.assign(cfg, JSON.parse(v) || {}); } catch (e) { /* sem config salva */ }
-      cfg.master = clamp(+cfg.master || 0, 0, 100);
+      cfg.master = clamp(+cfg.master || 0, 0, 100); cfg.tape = clamp(Math.round(+cfg.tape || 0), 0, 100);
       syncUI(); applyAudio();
     });
 
@@ -53,7 +53,7 @@
     });
 
     /* ================================================================ master, limitador, VU */
-    let master = null, anL = null, anR = null;
+    let master = null, tape = null, anL = null, anR = null;
     const identity = new Float32Array([-1, 1]);
     function buildAudio(ctx) {
       if (master && master.context === ctx) return;
@@ -61,7 +61,11 @@
       lim.rjCurve = lim.rjCurve || lim.curve;
       master = ctx.createGain();
       try { lim.disconnect(); } catch (e) { /* ja solto */ }
-      lim.connect(master); master.connect(ctx.destination);
+      // fita no master: limitador -> Tape -> ganho master. Tape 0 = copia a entrada (som igual).
+      if (tape) tape.disconnect();
+      tape = RJ.Tape ? new RJ.Tape(ctx, { drive: cfg.tape / 100 }) : null;
+      if (tape) { lim.connect(tape.input); tape.output.connect(master); } else lim.connect(master);
+      master.connect(ctx.destination);
       const sp2 = ctx.createChannelSplitter(2);
       anL = ctx.createAnalyser(); anR = ctx.createAnalyser();
       anL.fftSize = anR.fftSize = 1024;
@@ -73,6 +77,7 @@
     if (eng.ctx) buildAudio(eng.ctx);
 
     function applyAudio() {
+      if (tape) tape.setDrive(cfg.tape / 100);
       if (master) master.gain.setTargetAtTime(cfg.master / 100, master.context.currentTime, 0.01);
       if (eng.limiter && eng.limiter.rjCurve) eng.limiter.curve = cfg.limiter ? eng.limiter.rjCurve : identity;
       applyOutput();
@@ -90,12 +95,15 @@
       }
     }
 
+    const tape$ = $("#bar-tape"), tapeO = $("#bar-tape-o");
+    tape$.addEventListener("input", () => { cfg.tape = +tape$.value; tapeO.textContent = cfg.tape; applyAudio(); });
+    tape$.addEventListener("change", saveCfg);
     const master$ = $("#cfg-master"), masterO = $("#cfg-master-o"), sw = $("[data-ctrl=limitador]"), limO = $("#cfg-lim-o");
     master$.addEventListener("input", () => { cfg.master = +master$.value; masterO.textContent = cfg.master; applyAudio(); });
     master$.addEventListener("change", saveCfg);
     sw.addEventListener("click", () => { cfg.limiter = !cfg.limiter; syncUI(); applyAudio(); saveCfg(); });
     function syncUI() {
-      master$.value = cfg.master; masterO.textContent = cfg.master;
+      master$.value = cfg.master; masterO.textContent = cfg.master; tape$.value = cfg.tape; tapeO.textContent = cfg.tape;
       sw.setAttribute("aria-checked", cfg.limiter); limO.textContent = cfg.limiter ? "ON" : "OFF";
       const i = $("#cfg-in"), o = $("#cfg-out");
       if (i && i.querySelector(`option[value="${CSS.escape(cfg.input)}"]`)) i.value = cfg.input;
@@ -219,6 +227,7 @@
       const inp = document.createElement("input");
       inp.type = "text"; inp.maxLength = 60; inp.value = projName; inp.setAttribute("aria-label", "Nome do projeto");
       nameEl.hidden = true; nameBtn.insertBefore(inp, nameEl.nextSibling); inp.focus(); inp.select();
+      let closed = false;
       const done = ok => {
         if (closed || !inp.parentNode) return;
         closed = true;
@@ -228,7 +237,6 @@
       };
       inp.addEventListener("keydown", e => { if (e.key === "Enter") done(true); else if (e.key === "Escape") { e.stopPropagation(); done(false); } });
       inp.addEventListener("blur", () => done(true));
-      let closed = false;
     });
 
     /* ================================================================ os quatro aparelhos */
@@ -372,7 +380,7 @@
     $("[data-ctrl=salvar]").addEventListener("click", () => {
       try {
         DISKS.forEach(d => need(A[d.id].ready(), d.label));
-        const files = [], index = { format: "dcx-studio-project", version: 1, name: projName, saved: new Date().toISOString(), disks: [] };
+        const files = [], index = { format: "dcx-studio-project", version: 1, name: projName, tape: cfg.tape, saved: new Date().toISOString(), disks: [] };
         DISKS.forEach(d => { files.push({ name: d.file, data: JSON.stringify(wrap(d.id)) }); index.disks.push({ machine: d.id, label: d.label, file: d.file, summary: A[d.id].empty() ? "vazio" : A[d.id].info() }); });
         files.unshift({ name: "projeto.json", data: JSON.stringify(index, null, 1) });
         download(RJ.zip.make(files), slug(projName) + ".zip");
@@ -400,6 +408,7 @@
         if (!jobs.length) throw new Error("O projeto nao tem nenhum disquete.");
         if (DISKS.some(d => stateOf(d.id) === "alterado") && !confirm("Carregar o projeto troca o estado das maquinas. Continuar?")) return;
         jobs.forEach(([d, data]) => applyDisk(d.id, data));
+        if (index.tape != null) { cfg.tape = clamp(Math.round(+index.tape || 0), 0, 100); syncUI(); applyAudio(); saveCfg(); }
         if (index.name) { projName = String(index.name).slice(0, 60); nameEl.textContent = projName; saveName(); }
         say("Projeto \"" + projName + "\" carregado: " + jobs.map(j => j[0].label).join(", ") + "." + (skipped.length ? " Faltou: " + skipped.join(", ") + "." : ""), !!skipped.length);
       } catch (e) { console.warn(e); say(e instanceof SyntaxError ? "O projeto esta danificado." : e.message, true); }
@@ -407,7 +416,7 @@
     }));
 
     // para o teste e para quem quiser usar de fora
-    RJ.studioProject = { adapters: A, state: stateOf, setName: n => { projName = n; nameEl.textContent = n; saveName(); }, master: () => master, saveDisk, loadDisk };
+    RJ.studioProject = { adapters: A, state: stateOf, setName: n => { projName = n; nameEl.textContent = n; saveName(); }, master: () => master, tape: () => tape, setTape: v => { cfg.tape = clamp(Math.round(+v || 0), 0, 100); syncUI(); applyAudio(); saveCfg(); }, saveDisk, loadDisk };
     Promise.all([loaded, projReady]).then(() => { syncUI(); updateDot(); });
     refreshDisks();
     // o mapa dos controles da barra e do painel para o MIDI Learn nao existe: ficam de fora dele

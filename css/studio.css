@@ -7,3 +7,6 @@
 .studio-top.side { display: flex; align-items: flex-start; justify-content: center; gap: 16px; }
 .studio-top.side > .case { flex: none; zoom: var(--sp-scale, 1); }
 .studio-top.side > .d4-scroll { flex: none; width: auto; padding: 0; overflow: visible; }
+
+/* maquina selecionada para os pads do MIDI (js/select.js) */
+.pad-sel { outline: 2px solid #e8a33d; outline-offset: 3px; }

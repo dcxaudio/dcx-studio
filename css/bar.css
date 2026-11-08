@@ -32,6 +32,11 @@ body { padding-bottom: calc(var(--bar-h) + 8px + env(safe-area-inset-bottom)); }
 .sbar .proj .dirty { width: 6px; height: 6px; border-radius: 50%; background: var(--led-on); align-self: center; box-shadow: 0 0 4px var(--led-on); }
 .sbar .sp { flex: 1; }
 
+.tape { display: flex; align-items: center; gap: 8px; flex: none; }
+.tape .lbl { font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--bar-dim); }
+.tape input[type=range] { width: 84px; }
+.tape output { font-size: 11px; width: 22px; text-align: right; color: var(--bar-dim); font-variant-numeric: tabular-nums; }
+
 /* VU: 16 segmentos finos, canal unico por canal, discreto */
 .vu { display: flex; flex-direction: column; gap: 3px; flex: none; }
 .vu .row { display: flex; gap: 2px; align-items: center; }
@@ -110,6 +115,8 @@ select { height: 32px; border-radius: 4px; border: 1px solid var(--bar-line); ba
   .sbar .proj .lbl, .vu .row b { display: none; }
   .sbar .logo { height: 11px; }
   .vu .seg { width: 4px; }
+  .tape .lbl { display: none; }
+  .tape input[type=range] { width: 60px; }
   .sbar .proj input { width: 120px; }
   .cfg { right: 8px; left: 8px; width: auto; max-width: none; }
   .field { grid-template-columns: 80px 1fr 46px; }
