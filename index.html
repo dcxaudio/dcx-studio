@@ -247,7 +247,7 @@
         <div class="kc"><div class="knob r9-knob-s" data-ctrl="in-level" role="slider" tabindex="0" aria-label="Input Level"><i></i></div><span class="r9-cap">Level</span></div>
         <div class="d4-src">
           <div class="r42-bk"><button class="r9-btn" data-ctrl="in-source" aria-label="Source"></button><span class="r9-cap">Source</span></div>
-          <div class="d4-srcleds"><span class="r42-lr" data-src="rj2000"><i class="led r9-led" data-led="src-rj"></i>RJ-2000</span><span class="r42-lr" data-src="line"><i class="led r9-led" data-led="src-line"></i>Line</span></div>
+          <div class="d4-srcleds"><span class="r42-lr" data-src="rj2000"><i class="led r9-led" data-led="src-rj"></i>RJ-2000</span><span class="r42-lr" data-src="rj950"><i class="led r9-led" data-led="src-950"></i>RJ-950</span><span class="r42-lr" data-src="mix"><i class="led r9-led" data-led="src-mix"></i>Mix</span><span class="r42-lr" data-src="line"><i class="led r9-led" data-led="src-line"></i>Line</span></div>
         </div>
         <span class="d4-sp"></span>
         <div class="d4-st d4-bx"><div>FEITO NA BAIXADA</div></div>
@@ -515,9 +515,18 @@
 
       // Source RJ-2000 no 404: a saida do SP passa pelo 404 e sai do limitador direto
       // (dry: false), sem soar duplo. Line, desligado ou o 404 apagado: volta ao normal.
-      let unroute = null;
+      // Source RJ-950 faz o mesmo com a saida do 950 (entra no 404 pelo no src950 e some do direto);
+      // em Mix os dois entram, cada um com o seu envio.
+      let unroute = null, unroute950 = null, routedCtx = null;
       const syncRoute = () => {
-        const want = studio.on && d404.on && d404.src === "rj2000";
+        const on = studio.on && d404.on && d404.g;
+        if (routedCtx && (!on || routedCtx !== d404.g.ctx)) {   // o 404 apagou ou o grafo foi refeito
+          if (unroute) { unroute(); unroute = null; }
+          if (unroute950) { unroute950(); unroute950 = null; }
+          routedCtx = null;
+        }
+        const want = !!on && (d404.src === "rj2000" || d404.src === "mix");
+        const want950 = !!on && (d404.src === "rj950" || d404.src === "mix");
         if (want && !unroute) unroute = studio.route("rj2000", "dcx404", { dry: false });
         else if (!want && unroute) { unroute(); unroute = null; }
       };
@@ -538,3 +547,6 @@
   </script>
 </body>
 </html>
+        if (want950 && !unroute950) unroute950 = studio.route("rj950", d404.g.src950, { dry: false });
+        else if (!want950 && unroute950) { unroute950(); unroute950 = null; }
+        if (unroute || unroute950) routedCtx = d404.g.ctx;

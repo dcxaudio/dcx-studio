@@ -2,6 +2,7 @@
 
 ## Próxima
 
+- Source do 404 com **RJ-950** e **Mix** (RJ-2000 + RJ-950, com envio de cada um): o som do 950 passa pelos efeitos do 404 e some da saída direta. Submódulo dcx-404 em `2f04be1`.
 Submódulos atualizados: RJ-2000 `cd582fc`, RJ-950 `afb50b7`, RJ-42 `74d297d`.
 
 - **RJ-950:** filtro de 6 polos (Butterworth de 6ª ordem) com anti-imaging; o LCD diz "6-POLE".
