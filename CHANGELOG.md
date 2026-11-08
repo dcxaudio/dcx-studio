@@ -1,5 +1,13 @@
 # Changelog
 
+## Próxima
+
+Submódulos atualizados: RJ-2000 `cd582fc`, RJ-950 `afb50b7`, RJ-42 `74d297d`.
+
+- **RJ-950:** filtro de 6 polos (Butterworth de 6ª ordem) com anti-imaging; o LCD diz "6-POLE".
+- **RJ-42:** saturação de fita (`RJ.Tape`, menu TAPE no LCD); padrão 0, som igual ao anterior. O `index.html` agora carrega `vendor/rj-42/js/tape.js`.
+- RJ-2000: o repositório dele agora só tem o SP; o Studio continua usando só os js do SP e os css do 950 e do 42 vêm dos repositórios deles.
+
 ## b0.1 (beta)
 
 Primeira versão do DCX Studio, com: RJ-2000 b0.3 (`47dde3e`), RJ-950 b0.1 (`0cdf297`), RJ-42 b0.1 (`49d4e9c`), DCX 404 b0.1 (`b0125f2`), dcx-core v1.0.0.
