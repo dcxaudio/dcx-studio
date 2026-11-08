@@ -2,6 +2,8 @@
 
 ## Próxima
 
+- Submódulos: dcx-core **v1.1.0** (agora com o `RJ.Tape`) e RJ-42 `00ff6fe`. O Studio carrega `RJ.Tape` de `vendor/dcx-core/js/tape.js`, para a fita do RJ-42 e a do master usarem a mesma cópia.
+
 - **Pads do MIDI na máquina selecionada:** os 16 pads do controlador (canal 10, notas 36-51) tocam só na máquina selecionada: RJ-2000 (pads 1-16) ou DCX 404 (pads 1-16). Selecionada é a última clicada ou focada (padrão: RJ-2000), marcada com um contorno âmbar. O MIDI Learn continua valendo primeiro e o mapa padrão não desliga (`js/select.js`, `css/studio.css`). Nada mudou nos repositórios das máquinas.
 
 - **Corrigido:** digitar o nome do projeto (ou qualquer campo de texto) disparava notas e controles das máquinas. Com o foco num campo de texto, os atalhos de teclado de todas as máquinas ficam desligados e voltam ao sair do campo (`js/keyguard.js`). Nada mudou nos repositórios das máquinas.
