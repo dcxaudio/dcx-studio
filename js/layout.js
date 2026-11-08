@@ -13,7 +13,7 @@
   const STACK_W = 1100;   // em 1100 px ou menos o SP muda para o layout compacto dele: empilha
   const GAP = 16;         // espaco entre os dois (igual ao css/studio.css)
   const EDGE = 16;        // margem dos lados da janela
-  const TOP = 24, BOTTOM = 12;
+  const TOP = 24, BOTTOM = 60;   // 60: a barra inferior (48 px) mais a folga
 
   function fit() {
     const top = document.getElementById("studio-top");

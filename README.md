@@ -13,6 +13,15 @@ O RJ-2000 e o 404 diminuem juntos para caber na tela sem rolar (`js/layout.js`).
 
 O que fica salvo no navegador usa as mesmas chaves do Studio que morava no rj-2000 (`studio/rj2000/autosave`, `studio/rj950/autosave`, `studio/rj42/autosave`, `studio/midimap` e, agora, `studio/dcx404/...`). Como a origem é a mesma (`dcxaudio.github.io`), quem usava o rack no endereço antigo encontra tudo aqui.
 
+## Barra inferior, config e projeto
+
+Uma barra fixa embaixo (logo, nome do projeto, VU do master e a engrenagem) abre o painel de config:
+
+- **Audio:** volume master (depois do limitador; o VU le o mesmo ponto), limitador ON/OFF, entrada de audio (o dispositivo que a Line do 404 e o sampler abrem), saida de audio (`setSinkId`, quando o navegador tem) e o **MIDI geral**: ligar o MIDI, abrir o MIDI Learn (o mesmo do SET-UP 22 do RJ-2000) e salvar, carregar ou limpar o mapa. O mapa e a chave `studio/midimap` nao mudam. Os ajustes ficam em `studio/bar`.
+- **Projeto:** **Salvar projeto** baixa um `.zip` com um disquete JSON por aparelho (`rj-2000.json`, `rj-950.json`, `rj-42.json`, `dcx-404.json`, com os samples) e o `projeto.json`, o indice. **Carregar projeto** devolve o estado de cada aparelho. Cada linha tem **Salvar** e **Carregar** para um aparelho so (um `.json`). O nome do projeto (clique nele na barra) fica em `studio/projeto`. O estado de cada disquete: vazio, alterado (mexeu desde o ultimo salvar ou carregar) ou salvo.
+
+O zip e feito sem biblioteca (`js/zip.js`, modo "store"); ao abrir, le tambem zips comprimidos (deflate) quando o navegador tem `DecompressionStream`. O codigo da barra e `js/bar.js`, o estilo `css/bar.css`.
+
 ## Como é montado
 
 Cada aparelho é um submódulo em `vendor/`, preso numa versão. O `index.html` monta o host e o rack:

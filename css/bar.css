@@ -1,0 +1,119 @@
+/* DCX Studio - barra inferior e painel de config
+ * Estilo Braun: poucos elementos, alinhados, um acento so (o vermelho da casa). Vem do mockup
+ * aprovado (dcx-design/studio-barra). Claro e escuro seguem o sistema, como o resto do Studio.
+ */
+:root {
+  --bar: #1b1c1d; --bar-ink: #d8dad5; --bar-dim: #8d8f8a; --bar-line: #34363a; --bar-shadow: rgba(0,0,0,.5);
+  --panel: #232425; --field: #141516; --seg-off: #2e3032; --seg-ok: #8fae5a; --seg-hot: #d9a53a; --seg-clip: #d3302a;
+  --bar-h: 48px;
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --bar: #e9e8e2; --bar-ink: #1c1c1c; --bar-dim: #6c6d68; --bar-line: #c4c3bb; --bar-shadow: rgba(0,0,0,.18);
+    --panel: #f1f0eb; --field: #dedcd4; --seg-off: #cfcdc4; --seg-ok: #5f8a2e; --seg-hot: #c58d12;
+  }
+}
+body { padding-bottom: calc(var(--bar-h) + 8px + env(safe-area-inset-bottom)); }
+.sbar button, .cfg button, .cfg select, .cfg input { font-family: var(--font); color: inherit; }
+.sbar button, .cfg button { cursor: pointer; }
+.sbar button:focus-visible, .cfg button:focus-visible, .cfg select:focus-visible, .cfg input:focus-visible { outline: 2px solid var(--rule); outline-offset: 2px; }
+.sbar *, .cfg * { box-sizing: border-box; }
+.sbar, .cfg { font-family: var(--font); }
+
+/* ================= a barra ================= */
+.sbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 41; height: var(--bar-h); padding-bottom: env(safe-area-inset-bottom);
+  background: var(--bar); color: var(--bar-ink); border-top: 1px solid var(--bar-line);
+  box-shadow: 0 -6px 18px var(--bar-shadow); display: flex; align-items: center; gap: 18px; padding: 0 16px; box-sizing: content-box; }
+.sbar .logo { height: 14px; width: auto; flex: none; color: var(--bar-ink); display: block; }
+.sbar .sep { width: 1px; height: 22px; background: var(--bar-line); flex: none; }
+.sbar .proj { display: flex; align-items: baseline; gap: 8px; min-width: 0; background: transparent; border: 0; padding: 4px 0; text-align: left; }
+.sbar .proj .lbl { font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--bar-dim); }
+.sbar .proj .name { font-size: 15px; font-weight: 600; letter-spacing: .03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sbar .proj .dirty { width: 6px; height: 6px; border-radius: 50%; background: var(--led-on); align-self: center; box-shadow: 0 0 4px var(--led-on); }
+.sbar .sp { flex: 1; }
+
+/* VU: 16 segmentos finos, canal unico por canal, discreto */
+.vu { display: flex; flex-direction: column; gap: 3px; flex: none; }
+.vu .row { display: flex; gap: 2px; align-items: center; }
+.vu .row b { font-size: 8px; width: 8px; color: var(--bar-dim); font-weight: 600; }
+.vu .seg { width: 6px; height: 5px; border-radius: 1px; background: var(--seg-off); }
+.vu .seg.on { background: var(--seg-ok); }
+.vu .seg.on.hot { background: var(--seg-hot); }
+.vu .seg.on.clip { background: var(--seg-clip); }
+
+.cfg-btn { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--bar-line); background: transparent; display: grid; place-items: center; flex: none; color: var(--bar-ink); }
+.cfg-btn svg { width: 18px; height: 18px; }
+.cfg-btn[aria-expanded="true"] { background: var(--bar-ink); color: var(--bar); border-color: var(--bar-ink); }
+
+/* ================= painel de config ================= */
+.cfg { position: fixed; right: 12px; bottom: 60px; z-index: 40; width: 440px; max-width: calc(100vw - 24px); max-height: calc(100vh - 76px); overflow: auto;
+  background: var(--panel); color: var(--bar-ink); border: 1px solid var(--bar-line); border-radius: 10px;
+  box-shadow: 0 18px 40px var(--bar-shadow); padding: 4px 18px 18px; display: none; }
+.cfg.open { display: block; }
+.cfg section { padding-top: 14px; }
+.cfg section + section { border-top: 1px solid var(--bar-line); margin-top: 16px; }
+.cfg h2 { margin: 0 0 10px; font-size: 11px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
+.cfg h2::before { content: ""; width: 14px; height: 2px; background: var(--key-red); }
+.cfg h2 em { margin-left: auto; font-style: normal; font-weight: 400; letter-spacing: .04em; text-transform: none; font-size: 11px; color: var(--bar-dim); }
+
+.btns { display: flex; gap: 8px; margin-bottom: 12px; }
+.btn { flex: 1; height: 36px; border-radius: 4px; border: 1px solid var(--bar-line); background: transparent; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; font-weight: 600; }
+.btn.main { background: var(--bar-ink); color: var(--bar); border-color: var(--bar-ink); }
+.btn:hover { border-color: var(--bar-ink); }
+
+.disks { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.disk { display: grid; grid-template-columns: 26px 1fr auto auto; align-items: center; gap: 10px; padding: 7px 8px; border-radius: 4px; background: var(--field); }
+.disk .fl { width: 22px; height: 22px; color: var(--bar-dim); }
+.disk[data-state="salvo"] .fl { color: var(--bar-ink); }
+.disk .nm { font-size: 14px; font-weight: 600; letter-spacing: .06em; line-height: 1.1; }
+.disk .nm small { display: block; font-weight: 400; font-size: 11px; letter-spacing: .02em; color: var(--bar-dim); margin-top: 1px; }
+.disk .st { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--bar-dim); display: flex; align-items: center; gap: 6px; }
+.disk .st i { width: 7px; height: 7px; border-radius: 50%; background: var(--led-off); }
+.disk[data-state="salvo"] .st i { background: var(--seg-ok); box-shadow: 0 0 4px var(--seg-ok); }
+.disk[data-state="alterado"] .st i { background: var(--led-on); box-shadow: 0 0 4px var(--led-on); }
+.disk .one { height: 26px; padding: 0 9px; border-radius: 3px; border: 1px solid var(--bar-line); background: transparent; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+.disk .one:hover { border-color: var(--bar-ink); }
+.foot { margin: 10px 0 0; font-size: 11px; color: var(--bar-dim); line-height: 1.4; }
+
+.field { display: grid; grid-template-columns: 96px 1fr 52px; align-items: center; gap: 10px; margin-bottom: 12px; }
+.field label { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; }
+.field output { font-family: var(--lcd-font); font-size: 20px; text-align: right; color: var(--bar-ink); }
+input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 22px; background: transparent; margin: 0; }
+input[type=range]::-webkit-slider-runnable-track { height: 3px; background: var(--bar-line); border-radius: 2px; }
+input[type=range]::-moz-range-track { height: 3px; background: var(--bar-line); border-radius: 2px; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 20px; margin-top: -8.5px; border-radius: 2px; background: linear-gradient(#f4f2e6, var(--key)); border: 1px solid #7d7f7b; box-shadow: 0 2px 0 #b9b6a8; }
+input[type=range]::-moz-range-thumb { width: 12px; height: 20px; border-radius: 2px; background: var(--key); border: 1px solid #7d7f7b; }
+.sw { width: 44px; height: 22px; border-radius: 11px; border: 1px solid var(--bar-line); background: var(--field); position: relative; padding: 0; }
+.sw::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--bar-dim); transition: transform .15s, background .15s; }
+.sw[aria-checked="true"]::after { transform: translateX(22px); background: var(--key-red); }
+select { height: 32px; border-radius: 4px; border: 1px solid var(--bar-line); background: var(--field); padding: 0 8px; font-size: 13px; width: 100%; grid-column: 2 / 4; }
+.open-items { margin: 4px 0 0; padding: 8px 10px; border: 1px dashed var(--bar-line); border-radius: 4px; font-size: 11px; line-height: 1.45; color: var(--bar-dim); }
+
+
+.sbar .proj input { font: inherit; font-size: 15px; font-weight: 600; letter-spacing: .03em; color: inherit; background: var(--field); border: 1px solid var(--bar-line); border-radius: 3px; padding: 2px 6px; width: 180px; }
+.sbar .dirty[hidden] { display: none; }
+.disk .acts { display: flex; gap: 4px; }
+.disk { grid-template-columns: 26px 1fr auto auto; }
+.cfg .msg { margin: 8px 0 0; font-size: 12px; color: var(--bar-dim); min-height: 1.4em; }
+.cfg .msg.err { color: var(--led-on); }
+.cfg h3 { margin: 14px 0 8px; font-size: 10px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--bar-dim); }
+.cfg .field select { grid-column: 2 / 4; }
+.cfg .field.wide { grid-template-columns: 96px 1fr; }
+.cfg .field.wide select, .cfg .field.wide .btnrow { grid-column: 2; }
+.btnrow { display: flex; gap: 6px; flex-wrap: wrap; }
+.btnrow .one { height: 28px; padding: 0 10px; border-radius: 3px; border: 1px solid var(--bar-line); background: transparent; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+.btnrow .one:hover { border-color: var(--bar-ink); }
+.cfg .stat { font-size: 11px; color: var(--bar-dim); margin: -4px 0 10px; line-height: 1.4; }
+.cfg [disabled] { opacity: .45; cursor: default; }
+@media (max-width: 640px) {
+  .sbar { gap: 12px; padding: 0 12px; }
+  .sbar .proj .lbl, .vu .row b { display: none; }
+  .sbar .logo { height: 11px; }
+  .vu .seg { width: 4px; }
+  .sbar .proj input { width: 120px; }
+  .cfg { right: 8px; left: 8px; width: auto; max-width: none; }
+  .field { grid-template-columns: 80px 1fr 46px; }
+  .cfg .field.wide { grid-template-columns: 80px 1fr; }
+  .disk { grid-template-columns: 22px 1fr auto; }
+  .disk .st { display: none; }
+}

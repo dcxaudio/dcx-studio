@@ -2,6 +2,9 @@
 
 ## Próxima
 
+- **Barra inferior** fixa (logo, nome do projeto, VU do master, engrenagem) e **painel de config**: Audio (volume master, limitador, entrada e saida de audio, atalhos do MIDI geral: ligar, MIDI Learn, salvar/carregar/limpar o mapa, que continua o mesmo) e Projeto.
+- **Salvar e carregar projeto:** um `.zip` com um disquete JSON por aparelho (RJ-2000, RJ-950, RJ-42 e DCX 404, com os samples) e o `projeto.json`; cada aparelho tambem salva e carrega o proprio disquete. Novos: `js/bar.js`, `js/zip.js`, `css/bar.css`, `img/dcx-studio.svg`. Nenhum submodulo mudou.
+
 - Source do 404 com **RJ-950** e **Mix** (RJ-2000 + RJ-950, com envio de cada um): o som do 950 passa pelos efeitos do 404 e some da saída direta. Submódulo dcx-404 em `2f04be1`.
 Submódulos atualizados: RJ-2000 `cd582fc`, RJ-950 `afb50b7`, RJ-42 `74d297d`.
 
