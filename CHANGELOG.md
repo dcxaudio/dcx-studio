@@ -2,6 +2,8 @@
 
 ## Próxima
 
+- **Shift do teclado = Shift do 404:** com o DCX 404 selecionado (contorno âmbar) e o foco fora de campos de texto, segurar Shift no teclado liga o Shift do 404 (o botão acende), e soltar desliga; por exemplo Shift + clique em Reverse liga o LO-FI do pad. Trocar de máquina, perder o foco da janela ou soltar a tecla desliga, então o Shift nunca fica preso. Com o RJ-2000 selecionado nada muda. O clique no botão Shift do 404 segue como trava (liga/desliga). Mudou no repositório do dcx-404: `setShiftKey()` em `js/dcx404.js` (acende o botão e vale na página de envios), `js/solo.js` usa ele (`js/select.js` no Studio).
+
 - Submódulos: dcx-core **v1.1.0** (agora com o `RJ.Tape`) e RJ-42 `00ff6fe`. O Studio carrega `RJ.Tape` de `vendor/dcx-core/js/tape.js`, para a fita do RJ-42 e a do master usarem a mesma cópia.
 
 - **Pads do MIDI na máquina selecionada:** os 16 pads do controlador (canal 10, notas 36-51) tocam só na máquina selecionada: RJ-2000 (pads 1-16) ou DCX 404 (pads 1-16). Selecionada é a última clicada ou focada (padrão: RJ-2000), marcada com um contorno âmbar. O MIDI Learn continua valendo primeiro e o mapa padrão não desliga (`js/select.js`, `css/studio.css`). Nada mudou nos repositórios das máquinas.
