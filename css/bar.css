@@ -51,7 +51,7 @@ body { padding-bottom: calc(var(--bar-h) + 8px + env(safe-area-inset-bottom)); }
 .cfg-btn[aria-expanded="true"] { background: var(--bar-ink); color: var(--bar); border-color: var(--bar-ink); }
 
 /* ================= painel de config ================= */
-.cfg { position: fixed; right: 12px; bottom: 60px; z-index: 40; width: 440px; max-width: calc(100vw - 24px); max-height: calc(100vh - 76px); overflow: auto;
+.cfg { position: fixed; right: 12px; bottom: calc(var(--bar-h) + 12px + env(safe-area-inset-bottom)); z-index: 40; width: 440px; max-width: calc(100vw - 24px); max-height: calc(100vh - 76px); overflow: auto;
   background: var(--panel); color: var(--bar-ink); border: 1px solid var(--bar-line); border-radius: 10px;
   box-shadow: 0 18px 40px var(--bar-shadow); padding: 4px 18px 18px; display: none; }
 .cfg.open { display: block; }
@@ -105,6 +105,7 @@ select { height: 32px; border-radius: 4px; border: 1px solid var(--bar-line); ba
 .cfg .field select { grid-column: 2 / 4; }
 .cfg .field.wide { grid-template-columns: 96px 1fr; }
 .cfg .field.wide select, .cfg .field.wide .btnrow { grid-column: 2; }
+.cfg .field.wide input[type=text] { height: 32px; border-radius: 4px; border: 1px solid var(--bar-line); background: var(--field); color: var(--bar-ink); padding: 0 8px; font-size: 13px; width: 100%; }
 .btnrow { display: flex; gap: 6px; flex-wrap: wrap; }
 .btnrow .one { height: 28px; padding: 0 10px; border-radius: 3px; border: 1px solid var(--bar-line); background: transparent; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
 .btnrow .one:hover { border-color: var(--bar-ink); }
@@ -123,4 +124,15 @@ select { height: 32px; border-radius: 4px; border: 1px solid var(--bar-line); ba
   .cfg .field.wide { grid-template-columns: 80px 1fr; }
   .disk { grid-template-columns: 22px 1fr auto; }
   .disk .st { display: none; }
+}
+
+/* telas finas: a barra prioriza a engrenagem (ela nunca sai do canto direito). Primeiro some o
+ * VU, e o nome do projeto fica legivel; depois some o nome, que passa a ser editado no painel,
+ * no campo "Nome" (js/bar.js mantem os dois iguais). Sem VU e sem nome, logo + Tape + engrenagem
+ * ainda cabem ate ~285 px; abaixo disso o Tape teria que sair. */
+@media (max-width: 560px) {
+  .sbar .vu { display: none; }
+}
+@media (max-width: 440px) {
+  .sbar .proj { display: none; }
 }

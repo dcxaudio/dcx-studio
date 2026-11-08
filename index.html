@@ -6,6 +6,7 @@
   <title>DCX Studio</title>
   <meta name="description" content="DCX Studio: o RJ-2000, o RJ-950, o RJ-42 e o DCX 404 no mesmo rack, no navegador. Projeto open source da DCX Audio.">
   <meta name="theme-color" content="#1c1c1c">
+  <link rel="icon" href="img/dcx-studio.svg">
   <!-- cada aparelho traz o seu CSS; o comum vem do dcx-core -->
   <link rel="stylesheet" href="vendor/dcx-core/css/base.css">
   <!-- o 404 antes do rj2000.css: ele repete regras dele (.r9-*, .r42-*, .pad) sem as telas menores -->
@@ -465,6 +466,7 @@
   <div class="cfg" id="cfg" role="dialog" aria-label="Configuracoes do Studio" hidden>
     <section aria-labelledby="h-proj">
       <h2 id="h-proj">Projeto <em>um arquivo .zip, quatro disquetes</em></h2>
+      <div class="field wide"><label for="cfg-proj-name">Nome</label><input id="cfg-proj-name" data-ctrl="projeto-nome-painel" type="text" maxlength="60" value="Sem titulo" autocomplete="off"></div>
       <div class="btns">
         <button class="btn main" type="button" data-ctrl="salvar">Salvar projeto</button>
         <button class="btn" type="button" data-ctrl="carregar">Carregar projeto</button>

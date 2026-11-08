@@ -44,7 +44,7 @@
     function panel(open) {
       cfgEl.classList.toggle("open", open);
       cfgBtn.setAttribute("aria-expanded", open);
-      if (open) { refreshDevices(); refreshDisks(); refreshMidi(); }
+      if (open) { if (nameField) nameField.value = projName; refreshDevices(); refreshDisks(); refreshMidi(); }
     }
     cfgBtn.addEventListener("click", () => panel(!cfgEl.classList.contains("open")));
     document.addEventListener("keydown", e => { if (e.key === "Escape" && cfgEl.classList.contains("open") && !e.target.closest("input[type=text]")) panel(false); });
@@ -220,8 +220,18 @@
     /* ================================================================ nome do projeto */
     let projName = "Sem titulo";
     const nameBtn = $("[data-ctrl=projeto-nome]"), nameEl = $(".name", nameBtn), dot = $(".dirty", nameBtn);
-    const projReady = studio.store.get("projeto").then(v => { try { const d = JSON.parse(v); if (d && d.name) projName = String(d.name).slice(0, 60); } catch (e) { /* novo */ } nameEl.textContent = projName; });
+    const nameField = $("#cfg-proj-name");   // o mesmo nome no painel (a barra esconde o nome em tela fina)
     const saveName = () => studio.store.put("projeto", JSON.stringify({ name: projName }));
+    // um lugar so para trocar o nome: a barra, o painel e a chave studio/projeto andam juntos
+    function setProjName(name, persist = true) {
+      const v = String(name == null ? "" : name).trim().slice(0, 60);
+      if (v) projName = v;                       // vazio: mantem o nome que ja estava
+      if (nameEl) nameEl.textContent = projName;
+      if (nameField) nameField.value = projName;
+      if (persist && v) saveName();
+      return projName;
+    }
+    const projReady = studio.store.get("projeto").then(v => { try { const d = JSON.parse(v); if (d && d.name) projName = String(d.name).slice(0, 60); } catch (e) { /* novo */ } setProjName(projName, false); });
     nameBtn.addEventListener("click", () => {
       if ($("input", nameBtn)) return;
       const inp = document.createElement("input");
@@ -232,12 +242,20 @@
         if (closed || !inp.parentNode) return;
         closed = true;
         const v = inp.value.trim();
-        if (ok && v) { projName = v.slice(0, 60); saveName(); }
+        if (ok && v) setProjName(v);
         inp.remove(); nameEl.hidden = false; nameEl.textContent = projName;
       };
       inp.addEventListener("keydown", e => { if (e.key === "Enter") done(true); else if (e.key === "Escape") { e.stopPropagation(); done(false); } });
       inp.addEventListener("blur", () => done(true));
     });
+    // o campo do painel tambem troca o nome (Enter aplica e sai; Esc devolve o que estava)
+    if (nameField) {
+      nameField.addEventListener("change", () => setProjName(nameField.value));
+      nameField.addEventListener("keydown", e => {
+        if (e.key === "Enter") { e.preventDefault(); setProjName(nameField.value); nameField.blur(); }
+        else if (e.key === "Escape") { e.stopPropagation(); nameField.value = projName; nameField.blur(); }
+      });
+    }
 
     /* ================================================================ os quatro aparelhos */
     const need = (cond, what) => { if (!cond) throw new Error(what + " ainda nao ligou: ligue o Studio primeiro."); };
@@ -334,7 +352,11 @@
     function pick(accept, fn) {
       const inp = document.createElement("input");
       inp.type = "file"; inp.accept = accept; inp.hidden = true;
-      inp.addEventListener("change", () => { const f = inp.files[0]; inp.remove(); if (f) fn(f); });
+      const done = () => inp.remove();
+      inp.addEventListener("change", () => { const f = inp.files[0]; done(); if (f) fn(f); });
+      // o usuario fechou o seletor sem escolher: o input nao fica no body (evento "cancel":
+      // Chrome 113+, Firefox 91+ e Safari 16.4+; sem ele, o input fica no body, escondido).
+      inp.addEventListener("cancel", done);
       document.body.appendChild(inp); inp.click();
     }
     const download = (blob, name) => RJ.dsp.downloadBlob(blob, name);
@@ -409,14 +431,14 @@
         if (DISKS.some(d => stateOf(d.id) === "alterado") && !confirm("Carregar o projeto troca o estado das maquinas. Continuar?")) return;
         jobs.forEach(([d, data]) => applyDisk(d.id, data));
         if (index.tape != null) { cfg.tape = clamp(Math.round(+index.tape || 0), 0, 100); syncUI(); applyAudio(); saveCfg(); }
-        if (index.name) { projName = String(index.name).slice(0, 60); nameEl.textContent = projName; saveName(); }
+        if (index.name) setProjName(index.name);
         say("Projeto \"" + projName + "\" carregado: " + jobs.map(j => j[0].label).join(", ") + "." + (skipped.length ? " Faltou: " + skipped.join(", ") + "." : ""), !!skipped.length);
       } catch (e) { console.warn(e); say(e instanceof SyntaxError ? "O projeto esta danificado." : e.message, true); }
       updateDot();
     }));
 
     // para o teste e para quem quiser usar de fora
-    RJ.studioProject = { adapters: A, state: stateOf, setName: n => { projName = n; nameEl.textContent = n; saveName(); }, master: () => master, tape: () => tape, setTape: v => { cfg.tape = clamp(Math.round(+v || 0), 0, 100); syncUI(); applyAudio(); saveCfg(); }, saveDisk, loadDisk };
+    RJ.studioProject = { adapters: A, state: stateOf, setName: n => setProjName(n), master: () => master, tape: () => tape, setTape: v => { cfg.tape = clamp(Math.round(+v || 0), 0, 100); syncUI(); applyAudio(); saveCfg(); }, saveDisk, loadDisk };
     Promise.all([loaded, projReady]).then(() => { syncUI(); updateDot(); });
     refreshDisks();
     // o mapa dos controles da barra e do painel para o MIDI Learn nao existe: ficam de fora dele
