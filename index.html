@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>DCX Studio</title>
+  <meta name="description" content="DCX Studio: o RJ-2000, o RJ-950, o RJ-42 e o DCX 404 no mesmo rack, no navegador. Projeto open source da DCX Audio.">
+  <meta name="theme-color" content="#1c1c1c">
+  <!-- cada aparelho traz o seu CSS; o comum vem do dcx-core -->
+  <link rel="stylesheet" href="vendor/dcx-core/css/base.css">
+  <!-- o 404 antes do rj2000.css: ele repete regras dele (.r9-*, .r42-*, .pad) sem as telas menores -->
+  <link rel="stylesheet" href="vendor/dcx-404/css/dcx404.css">
+  <link rel="stylesheet" href="vendor/rj-2000/css/rj2000.css">
+  <link rel="stylesheet" href="vendor/rj-950/css/rj950.css">
+  <link rel="stylesheet" href="vendor/rj-42/css/rj42.css">
+  <link rel="stylesheet" href="css/studio.css">
+</head>
+<body>
+  <div class="power" id="power">
+    <button class="power-btn" id="power-btn" type="button">
+      <span class="power-ring"></span>
+      <span class="power-label">LIGAR</span>
+    </button>
+    <p class="power-hint">DCX Studio &middot; DCX Audio<br>Toque para ligar o som</p>
+  </div>
+
+  <main class="unit">
+    <!-- o topo do rack: o RJ-2000 e o DCX 404 lado a lado (js/layout.js ajusta a escala) -->
+    <div class="studio-top" id="studio-top">
+    <div class="case">
+      <header class="strip strip-top">
+        <span class="logo">RJ-2000</span>
+        <span class="subtitle">Sampling Percussion</span>
+      </header>
+
+      <div class="face">
+        <!-- ===================================================== modulos -->
+        <section class="mod mod-setup">
+          <h2>Set-up</h2>
+          <div class="mod-body">
+            <div class="keycol"><i class="led" data-led="setup"></i><button class="key" data-act="setup" aria-label="Set-up"></button></div>
+            <ol class="legend">
+              <li><b>11</b>Multi Pitch</li><li><b>12</b>Multi Level</li><li><b>13</b>Exit Multi Mode</li>
+              <li><b>14</b>Dynamic Buttons</li><li><b>15</b>Define Mix</li><li><b>16</b>Select Mix</li>
+              <li><b>17</b>Channel Assign</li><li><b>18</b>Decay/Tune Select</li><li><b>19</b>Loop/Truncate</li>
+              <li><b>20</b>Delete Sound</li><li><b>22</b>MIDI Learn</li>
+              <li><b>23</b>Special</li>
+            </ol>
+          </div>
+        </section>
+
+        <section class="mod mod-disk">
+          <h2>Disk</h2>
+          <div class="mod-body">
+            <div class="keycol"><i class="led" data-led="disk"></i><button class="key" data-act="disk" aria-label="Disk"></button></div>
+            <ol class="legend">
+              <li><b>1</b>Save Sequences</li><li><b>2</b>Save Sounds</li><li><b>3</b>Load Sequences</li>
+              <li><b>4</b>Load Segment #</li><li><b>5</b>Load Sounds</li><li><b>6</b>Load Sound #</li>
+              <li><b>9</b>New</li>
+              <li><b>0</b>Load Sequences and Sounds</li>
+            </ol>
+          </div>
+        </section>
+
+        <section class="mod mod-sample">
+          <h2>Sample</h2>
+          <div class="mod-body">
+            <div class="col">
+              <div class="keycol"><i class="led" data-led="sample"></i><button class="key key-red" data-act="sample" aria-label="Sample"></button></div>
+              <ol class="legend">
+                <li><b>1</b>VU Mode</li><li><b>2</b>Assign Voice</li><li><b>4</b>Threshold Set</li>
+                <li><b>5</b>Sample Length</li><li><b>7</b>Arm Sampling</li><li><b>8</b>Load File</li><li><b>9</b>Force Sampling</li>
+              </ol>
+            </div>
+            <div class="knob-wrap">
+              <div class="knob" id="knob-gain" role="slider" tabindex="0" aria-label="Gain"><i></i></div>
+              <span class="cap">Gain</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===================================================== master control -->
+        <section class="mod mod-master">
+          <h2>Master Control</h2>
+          <div class="lcd-bezel">
+            <div class="lcd" id="lcd" aria-live="polite">
+              <div class="lcd-row" id="lcd1"></div>
+              <div class="lcd-row" id="lcd2"></div>
+            </div>
+          </div>
+          <div class="nav4">
+            <div class="kc"><button class="key" data-act="tempo" aria-label="Tempo"></button><span class="cap">Tempo</span></div>
+            <div class="kc"><button class="key" data-key="dec" aria-label="Seta para a esquerda"></button><span class="cap">&#9664;</span></div>
+            <div class="kc"><button class="key" data-key="inc" aria-label="Seta para a direita"></button><span class="cap">&#9654;</span></div>
+            <div class="kc"><button class="key" data-key="enter" aria-label="Enter"></button><span class="cap">Enter</span></div>
+          </div>
+          <div class="knobs">
+            <div class="knob-wrap"><div class="knob" id="knob-mix" role="slider" tabindex="0" aria-label="Mix Volume"><i></i></div><span class="cap">Mix<br>Volume</span></div>
+            <div class="knob-wrap"><div class="knob" id="knob-met" role="slider" tabindex="0" aria-label="Metronome Volume"><i></i></div><span class="cap">Metronome<br>Volume</span></div>
+          </div>
+          <div class="keypad">
+            <div class="kc"><span class="cap">1</span><button class="key" data-key="1" aria-label="1"></button></div>
+            <div class="kc"><span class="cap">2</span><button class="key" data-key="2" aria-label="2"></button></div>
+            <div class="kc"><span class="cap">3</span><button class="key" data-key="3" aria-label="3"></button></div>
+            <div class="kc"><span class="cap">4</span><button class="key" data-key="4" aria-label="4"></button></div>
+            <div class="kc"><span class="cap">5</span><button class="key" data-key="5" aria-label="5"></button></div>
+            <div class="kc"><span class="cap">6</span><button class="key" data-key="6" aria-label="6"></button></div>
+            <div class="kc"><span class="cap">7</span><button class="key" data-key="7" aria-label="7 ou No"></button><span class="cap">No</span></div>
+            <div class="kc"><span class="cap">8</span><button class="key" data-key="8" aria-label="8"></button><span class="cap">0</span></div>
+            <div class="kc"><span class="cap">9</span><button class="key" data-key="9" aria-label="9 ou Yes"></button><span class="cap">Yes</span></div>
+            <div class="kc kc-zero"><button class="key" data-key="0" aria-label="0"></button></div>
+          </div>
+        </section>
+
+        <!-- ===================================================== programming -->
+        <section class="mod mod-prog">
+          <h2>Programming</h2>
+          <div class="prog-row">
+            <div class="selector">
+              <button class="key" data-act="songseg" aria-label="Song/Segment"></button>
+              <div class="ledbar">
+                <span><i class="led" data-led="song"></i>Song</span>
+                <span><i class="led" data-led="segment"></i>Segment</span>
+              </div>
+            </div>
+            <div class="dual"><span class="t">Trigger</span><button class="key" data-prog="0" aria-label="Trigger / Metronome"></button><span class="b">Metronome</span></div>
+            <div class="dual"><span class="t">Repeat</span><button class="key" data-prog="1" aria-label="Repeat / Swing"></button><span class="b">Swing</span></div>
+            <div class="dual"><span class="t">Subsong</span><button class="key" data-prog="2" aria-label="Subsong / Copy"></button><span class="b">Copy</span></div>
+            <div class="dual"><span class="t">End</span><button class="key" data-prog="3" aria-label="End / Time Signature"></button><span class="b">Time<br>Signature</span></div>
+            <div class="dual"><span class="t">Insert</span><button class="key" data-prog="4" aria-label="Insert / Segment Length"></button><span class="b">Segment<br>Length</span></div>
+            <div class="dual"><span class="t">Delete</span><button class="key" data-prog="5" aria-label="Delete / Erase"></button><span class="b">Erase</span></div>
+            <div class="dual"><span class="t">Tempo<br>Change</span><button class="key" data-prog="6" aria-label="Tempo Change / Auto Correct"></button><span class="b">Auto<br>Correct</span></div>
+            <div class="dual"><span class="t">Mix<br>Change</span><button class="key" data-prog="7" aria-label="Mix Change / Step Program"></button><span class="b">Step<br>Program</span></div>
+          </div>
+        </section>
+
+        <!-- ===================================================== performance -->
+        <section class="mod mod-perf">
+          <h2>Performance</h2>
+          <div class="perf">
+            <div class="selector sel-mode">
+              <button class="key" data-act="perfmode" aria-label="Tune/Decay, Mix, Multi Mode"></button>
+              <div class="ledbar">
+                <span><i class="led" data-led="tune"></i>Tune/Decay</span>
+                <span><i class="led" data-led="mix"></i>Mix</span>
+                <span><i class="led" data-led="multi"></i>Multi Mode</span>
+              </div>
+            </div>
+            <div class="faders" id="faders"></div>
+            <div class="selector sel-bank">
+              <button class="key" data-act="bank" aria-label="Banco"></button>
+              <div class="ledbar">
+                <span><i class="led" data-led="bankA"></i>A</span>
+                <span><i class="led" data-led="bankB"></i>B</span>
+                <span><i class="led" data-led="bankC"></i>C</span>
+                <span><i class="led" data-led="bankD"></i>D</span>
+              </div>
+            </div>
+            <div class="pads" id="pads"></div>
+          </div>
+        </section>
+
+        <!-- ===================================================== transporte -->
+        <section class="mod mod-transport">
+          <div class="transport">
+            <div class="kc"><span class="led-slot"></span><button class="pad pad-t" id="btn-tap" aria-label="Tap/Repeat"></button><span class="cap">Tap/Repeat</span></div>
+            <div class="kc"><i class="led" data-led="run"></i><button class="pad pad-t" id="btn-run" aria-label="Run/Stop"></button><span class="cap">Run/Stop</span></div>
+            <div class="kc"><i class="led" data-led="rec"></i><button class="key key-red key-rec" id="btn-rec" aria-label="Record/Edit"></button><span class="cap">Record/Edit</span></div>
+          </div>
+        </section>
+      </div>
+
+      <footer class="strip strip-bottom">
+        <span class="maker">DCX Audio</span>
+      </footer>
+    </div>
+
+    <!-- ===================================================== DCX 404 (ao lado do RJ-2000; embaixo dele em telas estreitas) -->
+    <div class="d4-scroll">
+    <section class="d4" id="d4" aria-label="DCX 404 Performance Sampler">
+      <i class="d4-hole" style="left:12px;top:10px"></i><i class="d4-hole" style="right:12px;top:10px"></i>
+      <i class="d4-hole" style="left:12px;bottom:10px"></i><i class="d4-hole" style="right:12px;bottom:10px"></i>
+
+      <div class="d4-top">
+        <div class="r9-brand"><span class="r9-maker">DCX</span><span class="r9-sub">Performance Sampler</span></div>
+        <span class="r9-model">404</span>
+      </div>
+
+      <div class="d4-knobs">
+        <div class="d4-vol"><div class="knob r9-control" data-ctrl="volume" role="slider" tabindex="0" aria-label="Volume"><i></i></div><span class="r9-cap">Volume</span></div>
+        <div class="r42-group d4-fx"><span class="r42-gt">FX Control</span>
+          <div class="kc"><div class="knob" data-ctrl="ctrl-1" role="slider" tabindex="0" aria-label="Ctrl 1"><i></i></div><span class="r9-cap">Ctrl 1<br><span class="r42-dim" data-cap="1">&nbsp;</span></span></div>
+          <div class="kc"><div class="knob" data-ctrl="ctrl-2" role="slider" tabindex="0" aria-label="Ctrl 2"><i></i></div><span class="r9-cap">Ctrl 2<br><span class="r42-dim" data-cap="2">&nbsp;</span></span></div>
+          <div class="kc"><div class="knob" data-ctrl="ctrl-3" role="slider" tabindex="0" aria-label="Ctrl 3"><i></i></div><span class="r9-cap">Ctrl 3<br><span class="r42-dim" data-cap="3">&nbsp;</span></span></div>
+        </div>
+      </div>
+
+      <div class="d4-center">
+        <div class="d4-col l">
+          <div class="d4-fxk"><span class="r42-t">Filter+Drive<i class="led r9-led"></i></span><button class="r9-btn" data-ctrl="fx-filter" aria-label="Filter + Drive"></button></div>
+          <div class="d4-fxk"><span class="r42-t">Isolator<i class="led r9-led"></i></span><button class="r9-btn" data-ctrl="fx-isolator" aria-label="Isolator"></button></div>
+          <div class="d4-fxk"><span class="r42-t">Delay<i class="led r9-led"></i></span><button class="r9-btn" data-ctrl="fx-delay" aria-label="Delay"></button></div>
+        </div>
+        <div class="d4-screen">
+          <div class="r42-win" id="d4-seg" aria-label="Display" aria-live="polite"></div>
+          <div class="d4-leds">
+            <span class="r42-lr"><i class="led r9-led" data-led="bpm"></i>BPM</span>
+            <span class="r42-lr"><i class="led r9-led" data-led="pad"></i>Pad</span>
+            <span class="r42-lr"><i class="led r9-led" data-led="fx"></i>FX</span>
+          </div>
+        </div>
+        <div class="d4-col r">
+          <div class="d4-fxk"><span class="r42-t"><i class="led r9-led"></i>Vinyl Sim</span><button class="r9-btn" data-ctrl="fx-vinyl" aria-label="Vinyl Sim"></button></div>
+          <div class="d4-fxk"><span class="r42-t"><i class="led r9-led"></i>DJFX Looper</span><button class="r9-btn" data-ctrl="fx-djfx" aria-label="DJFX Looper"></button></div>
+          <div class="d4-fxk"><span class="r42-t"><i class="led r9-led"></i>MFX <span class="r42-dim">Pad 1–4</span></span><button class="r9-btn" data-ctrl="fx-mfx" aria-label="MFX"></button></div>
+        </div>
+      </div>
+
+      <div class="r42-group d4-grp"><span class="r42-gt">Perform</span>
+        <div class="d4-row">
+          <div class="r42-bk"><span class="r42-t">Bus 1</span><i class="led r9-led"></i><button class="r9-btn" data-ctrl="bus-1" aria-label="Bus 1"></button><span class="r9-cap r42-dim">Perform</span></div>
+          <div class="r42-bk"><span class="r42-t">Bus 2</span><i class="led r9-led"></i><button class="r9-btn" data-ctrl="bus-2" aria-label="Bus 2"></button><span class="r9-cap r42-dim">Master</span></div>
+          <div class="r42-bk"><span class="r42-t">Mute</span><i class="led r9-led"></i><button class="r9-btn" data-ctrl="mute" aria-label="Mute"></button><span class="r9-cap r42-dim">Break</span></div>
+          <div class="r42-bk"><span class="r42-t">Hold</span><i class="led r9-led"></i><button class="r9-btn" data-ctrl="hold" aria-label="Hold"></button><span class="r9-cap r42-dim">&nbsp;</span></div>
+          <div class="r42-bk"><span class="r42-t">Sub Pad</span><i class="led r9-led"></i><button class="r9-btn" data-ctrl="subpad" aria-label="Sub Pad"></button><span class="r9-cap r42-dim">Roll</span></div>
+          <div class="r42-bk"><span class="r42-t">Resample</span><i class="led r9-led"></i><button class="r9-btn red" data-ctrl="resample" aria-label="Resample"></button><span class="r9-cap r42-dim">Rec</span></div>
+        </div>
+      </div>
+
+      <div class="r42-group d4-grp"><span class="r42-gt">Pad Mode</span>
+        <div class="d4-row">
+          <div class="r42-bk"><span class="r42-t">Gate</span><i class="led r9-led"></i><button class="r9-btn" data-ctrl="gate" aria-label="Gate"></button></div>
+          <div class="r42-bk"><span class="r42-t">Loop</span><i class="led r9-led"></i><button class="r9-btn" data-ctrl="loop" aria-label="Loop"></button></div>
+          <div class="r42-bk"><span class="r42-t">Reverse</span><i class="led r9-led"></i><button class="r9-btn" data-ctrl="reverse" aria-label="Reverse"></button></div>
+          <div class="r42-bk"><span class="r42-t">Velocity</span><span class="led-slot" style="height:7px"></span><button class="r9-btn" data-ctrl="velocity" aria-label="Velocity"></button></div>
+          <div class="r42-bk"><span class="r42-t">Set-up</span><span class="led-slot" style="height:7px"></span><button class="r9-btn" data-ctrl="setup" aria-label="Set-up"></button></div>
+          <div class="r42-bk"><span class="r42-t">Shift</span><span class="led-slot" style="height:7px"></span><button class="r9-btn" data-ctrl="shift" aria-label="Shift"></button></div>
+        </div>
+      </div>
+
+      <div class="r42-group d4-pads"><span class="r42-gt">Sample Pads</span>
+        <div class="d4-pads-grid" id="d4-pads"></div>
+      </div>
+
+      <div class="d4-bottom">
+        <div class="kc"><i class="r9-jack" data-jack="line-in"></i><span class="r9-cap">Line In</span></div>
+        <div class="kc"><div class="knob r9-knob-s" data-ctrl="in-level" role="slider" tabindex="0" aria-label="Input Level"><i></i></div><span class="r9-cap">Level</span></div>
+        <div class="d4-src">
+          <div class="r42-bk"><button class="r9-btn" data-ctrl="in-source" aria-label="Source"></button><span class="r9-cap">Source</span></div>
+          <div class="d4-srcleds"><span class="r42-lr" data-src="rj2000"><i class="led r9-led" data-led="src-rj"></i>RJ-2000</span><span class="r42-lr" data-src="line"><i class="led r9-led" data-led="src-line"></i>Line</span></div>
+        </div>
+        <span class="d4-sp"></span>
+        <div class="d4-st d4-bx"><div>FEITO NA BAIXADA</div></div>
+        <span class="d4-sp"></span>
+        <div class="kc"><i class="r9-jack" data-jack="phones"></i><span class="r9-cap">Phones</span></div>
+      </div>
+    </section>
+    </div>
+    </div>
+
+
+
+    <!-- ===================================================== RJ-950 (rack embaixo do SP) -->
+    <section class="rack" id="r9" aria-label="RJ-950 MIDI Digital Sampler">
+      <div class="rack-ear"><i></i><i></i></div>
+      <div class="r9-face">
+        <div class="r9-brand">
+          <span class="r9-maker">DCX</span>
+          <span class="r9-sub">MIDI Digital Sampler</span>
+        </div>
+
+        <div class="r9-pow">
+          <div class="kc"><button class="r9-power" id="r9-power" aria-label="Power do RJ-950"></button><span class="r9-cap">Power</span></div>
+          <div class="kc"><div class="knob r9-knob-s" id="r9-contrast" role="slider" tabindex="0" aria-label="Contrast"><i></i></div><span class="r9-cap">Contrast</span></div>
+        </div>
+
+        <div class="r9-drive-wrap">
+          <span class="r9-cap">Floppy Disk Drive</span>
+          <button class="r9-drive" id="r9-drive" type="button" aria-label="Disquete: carregar arquivo de audio (clique ou solte o arquivo aqui)">
+            <span class="r9-slot"></span>
+            <span class="r9-drive-row"><i class="r9-busy" id="r9-busy"></i><span class="r9-eject"></span></span>
+          </button>
+        </div>
+
+        <div class="r9-display">
+          <div class="r9-model">RJ-950</div>
+          <div class="r9-lcd-row">
+            <div class="lcd-bezel r9-bezel">
+              <div class="lcd r9-lcd" id="r9-lcd" aria-live="polite">
+                <div class="lcd-row" id="r9-l1"></div>
+                <div class="lcd-row" id="r9-l2"></div>
+              </div>
+            </div>
+            <div class="r9-midi"><i class="led r9-led" id="r9-midi-led"></i><span class="r9-cap">MIDI</span></div>
+          </div>
+        </div>
+
+        <div class="r9-modes">
+            <div class="r9-mode"><span class="r9-t">Play</span><i class="led r9-led" data-r9led="play"></i><button class="r9-btn" data-r9mode="play" aria-label="Play"></button></div>
+            <div class="r9-mode"><span class="r9-t">Rec</span><i class="led r9-led" data-r9led="rec"></i><button class="r9-btn" data-r9mode="rec" aria-label="Rec"></button></div>
+            <div class="r9-mode"><span class="r9-t">Edit<br>Sample</span><i class="led r9-led" data-r9led="sample"></i><button class="r9-btn" data-r9mode="sample" aria-label="Edit Sample"></button></div>
+            <div class="r9-mode"><span class="r9-t">Edit<br>Program</span><i class="led r9-led" data-r9led="program"></i><button class="r9-btn" data-r9mode="program" aria-label="Edit Program"></button></div>
+            <div class="r9-mode"><span class="r9-t">MIDI</span><i class="led r9-led" data-r9led="midi"></i><button class="r9-btn" data-r9mode="midi" aria-label="MIDI"></button></div>
+            <div class="r9-mode"><span class="r9-t">Utility</span><i class="led r9-led" data-r9led="utility"></i><button class="r9-btn" data-r9mode="utility" aria-label="Utility"></button></div>
+            <div class="r9-mode"><span class="r9-t">Disk</span><i class="led r9-led" data-r9led="disk"></i><button class="r9-btn" data-r9mode="disk" aria-label="Disk"></button></div>
+            <div class="r9-mode"><span class="r9-t">Master<br>Tune</span><i class="led r9-led" data-r9led="tune"></i><button class="r9-btn" data-r9mode="tune" aria-label="Master Tune"></button></div>
+        </div>
+
+        <table class="r9-chart" aria-label="Paginas de cada modo">
+          <tr><th>Play</th><td>Sample select &middot; free memory</td></tr>
+          <tr><th>Rec</th><td>Rate &middot; length &middot; threshold</td></tr>
+          <tr><th>Edit Sample</th><td>1 Start/End &middot; 2 Loop &middot; 3 Tune/Level &middot; 4 Filter &middot; 5 Cut group &middot; 6 Envelope</td></tr>
+          <tr><th>Edit Program</th><td>RJ-2000 pad &rarr; sample</td></tr>
+          <tr><th>MIDI</th><td>Receive RJ-2000 pads (notes 36-67)</td></tr>
+          <tr><th>Utility</th><td>1 Copy &middot; 2 Delete &middot; 3 Clear all</td></tr>
+          <tr><th>Disk</th><td>1 Load audio &middot; 2 Save memory &middot; 3 Load memory</td></tr>
+          <tr><th>Master Tune</th><td>&plusmn;50 cents</td></tr>
+        </table>
+
+        <div class="r9-keys">
+            <button class="r9-key" data-r9key="1" aria-label="1">1</button>
+            <button class="r9-key" data-r9key="2" aria-label="2">2</button>
+            <button class="r9-key" data-r9key="3" aria-label="3">3</button>
+            <button class="r9-key r9-fn" data-r9key="left" aria-label="Cursor para a esquerda">&#9664;</button>
+            <button class="r9-key r9-fn" data-r9key="right" aria-label="Cursor para a direita">&#9654;</button>
+            <button class="r9-key" data-r9key="4" aria-label="4">4</button>
+            <button class="r9-key" data-r9key="5" aria-label="5">5</button>
+            <button class="r9-key" data-r9key="6" aria-label="6">6</button>
+            <button class="r9-key r9-fn" data-r9key="up" aria-label="Pagina acima">Page<br>&#9650;</button>
+            <button class="r9-key r9-fn" data-r9key="down" aria-label="Pagina abaixo">Page<br>&#9660;</button>
+            <button class="r9-key" data-r9key="7" aria-label="7">7</button>
+            <button class="r9-key" data-r9key="8" aria-label="8">8</button>
+            <button class="r9-key" data-r9key="9" aria-label="9">9</button>
+            <button class="r9-key r9-fn" data-r9key="on" aria-label="On / mais">On<br>+</button>
+            <button class="r9-key r9-fn" data-r9key="off" aria-label="Off / menos">Off<br>&minus;</button>
+            <button class="r9-key" data-r9key="." aria-label="Ponto">.</button>
+            <button class="r9-key" data-r9key="0" aria-label="0">0</button>
+            <button class="r9-key r9-fn" data-r9key="pb" aria-label="Playback (ouvir o sample)">PB</button>
+            <button class="r9-key r9-ent r9-fn" data-r9key="ent" aria-label="Enter">Ent</button>
+        </div>
+
+        <div class="r9-control-wrap">
+          <div class="knob r9-control" id="r9-control" role="slider" tabindex="0" aria-label="Control (muda o valor no cursor)"><i></i></div>
+          <span class="r9-cap">Control</span>
+        </div>
+
+        <div class="r9-knobs">
+          <div class="kc"><div class="knob r9-knob-s" id="r9-rec" role="slider" tabindex="0" aria-label="Rec Level"><i></i></div><span class="r9-cap">Rec Level</span></div>
+          <div class="kc"><div class="knob r9-knob-s" id="r9-mon" role="slider" tabindex="0" aria-label="Monitor"><i></i></div><span class="r9-cap">Monitor</span></div>
+          <div class="kc"><div class="knob r9-knob-s" id="r9-out" role="slider" tabindex="0" aria-label="Output"><i></i></div><span class="r9-cap">Output</span></div>
+        </div>
+
+        <div class="r9-jacks" aria-hidden="true">
+          <div class="kc"><i class="r9-jack"></i><span class="r9-cap">Mic</span></div>
+          <div class="kc"><i class="r9-jack"></i><span class="r9-cap">Input</span></div>
+          <div class="kc"><i class="r9-jack"></i><span class="r9-cap">Rec/PB<br>Trigger</span></div>
+        </div>
+      </div>
+      <div class="rack-ear"><i></i><i></i></div>
+    </section>
+
+    <section class="rack r42" id="r42" aria-label="RJ-42 Loop Phrase Recorder">
+      <div class="rack-ear"><i></i><i></i></div>
+      <div class="r42-face">
+        <div class="r42-brand">
+          <span class="r9-maker">DCX</span>
+          <span class="r9-sub">Loop Phrase Recorder</span>
+          <span class="r9-model r42-model">RJ-42</span>
+        </div>
+
+        <div class="r42-leds">
+          <div class="r42-readout"><div class="r42-win" id="r42-src" role="slider" tabindex="0" aria-label="Source BPM (arraste ou role para ajustar)"></div><span class="r9-cap">Source BPM</span></div>
+          <div class="r42-arrow" aria-hidden="true">&#9654;</div>
+          <div class="r42-readout"><div class="r42-win" id="r42-tgt" aria-label="Target BPM"></div><span class="r9-cap">Target BPM</span></div>
+          <div class="r42-readout"><div class="r42-win r42-small" id="r42-pos" aria-label="Compasso e tempo do inicio do loop"></div><span class="r9-cap">Bar . Beat</span></div>
+          <div class="r42-readout"><div class="r42-win r42-small" id="r42-num" aria-label="Loop escolhido"></div><span class="r9-cap">Loop</span></div>
+          <div class="r42-modes" id="r42-modes">
+            <button class="r42-lr" data-r42mode="vari" type="button"><i class="led r9-led"></i>Vari-Speed</button>
+            <button class="r42-lr" data-r42mode="stretch" type="button"><i class="led r9-led"></i>Stretch</button>
+            <button class="r42-lr" data-r42mode="off" type="button"><i class="led r9-led"></i>Off (Source)</button>
+          </div>
+        </div>
+
+        <div class="r42-search">
+          <div class="r42-jog" id="r42-jog" role="slider" tabindex="0" aria-label="Search: anda o inicio do loop"><i></i></div>
+          <span class="r9-cap">Search</span>
+          <div class="r42-bk r42-fine"><span class="r42-t"><i class="led r9-led" id="r42-fine-led"></i>Fine</span><button class="r9-btn" data-r42fine aria-label="Fine: o Search anda 1 ms por passo e o LCD da zoom no inicio"></button></div>
+        </div>
+
+        <div class="r42-drive-wrap">
+          <span class="r9-cap">Floppy Disk Drive</span>
+          <button class="r9-drive" id="r42-drive" type="button" aria-label="Disquete: carregar uma musica (clique ou solte o arquivo aqui)">
+            <span class="r9-slot"></span>
+            <span class="r9-drive-row"><i class="r9-busy" id="r42-busy"></i><span class="r9-eject"></span></span>
+          </button>
+          <span class="r9-cap r42-dim">Song In</span>
+        </div>
+
+        <div class="r42-lcd-wrap">
+          <div class="lcd-bezel r9-bezel">
+            <div class="lcd r9-lcd r42-lcd" id="r42-lcd" aria-live="polite">
+              <div class="lcd-row" id="r42-l1"></div>
+              <div class="lcd-row" id="r42-l2"></div>
+            </div>
+          </div>
+          <div class="r42-lcd-caps"><span class="r9-cap r42-dim">&#9664; Earlier</span><span class="r9-cap r42-dim">&#9660; = Bar &middot; Click to set In</span><span class="r9-cap r42-dim">Later &#9654;</span></div>
+        </div>
+
+        <div class="r42-pow">
+          <div class="kc"><button class="r9-power" id="r42-power" aria-label="Power do RJ-42"></button><span class="r9-cap">Power</span></div>
+          <div class="kc" aria-hidden="true"><i class="r9-jack"></i><span class="r9-cap">Input</span></div>
+          <div class="kc" aria-hidden="true"><i class="r9-jack"></i><span class="r9-cap">Foot<br>Tap</span></div>
+        </div>
+
+        <div class="r42-bars">
+          <div class="r42-group"><span class="r42-gt">Loop Length (Bars)</span>
+            <div class="r42-bk"><i class="led r9-led" data-r42barled="1"></i><button class="r9-btn r42-num-btn" data-r42bars="1" aria-label="1 compasso">1</button></div>
+            <div class="r42-bk"><i class="led r9-led" data-r42barled="2"></i><button class="r9-btn r42-num-btn" data-r42bars="2" aria-label="2 compassos">2</button></div>
+            <div class="r42-bk"><i class="led r9-led" data-r42barled="4"></i><button class="r9-btn r42-num-btn" data-r42bars="4" aria-label="4 compassos">4</button></div>
+            <div class="r42-bk"><i class="led r9-led" data-r42barled="8"></i><button class="r9-btn r42-num-btn" data-r42bars="8" aria-label="8 compassos">8</button></div>
+          </div>
+          <div class="r42-group"><span class="r42-gt">Loop Memory</span>
+            <div class="r42-slots" id="r42-slots"></div>
+          </div>
+        </div>
+
+        <div class="r42-send">
+          <div class="r42-group"><span class="r42-gt">Send Loop</span>
+            <div class="r42-bk"><i class="led r9-led" data-r42sendled="sp"></i><button class="r9-btn r42-wide" data-r42send="sp" aria-label="Mandar o loop para um pad do RJ-2000"></button><span class="r9-cap">To<br>RJ-2000</span></div>
+            <div class="r42-bk"><i class="led r9-led" data-r42sendled="s950"></i><button class="r9-btn r42-wide" data-r42send="s950" aria-label="Mandar o loop para o RJ-950"></button><span class="r9-cap">To<br>RJ-950</span></div>
+            <div class="r42-bk"><i class="led r9-led" data-r42sendled="disk"></i><button class="r9-btn r42-wide" data-r42send="disk" aria-label="Salvar o loop em arquivo WAV ou MP3"></button><span class="r9-cap">Disk<br>WAV / MP3</span></div>
+          </div>
+        </div>
+
+        <div class="r42-trans">
+          <div class="r42-bk"><span class="r42-t">Nudge &minus;</span><button class="r9-btn" data-r42key="nudge-" aria-label="Nudge: inicio um tempo antes"></button></div>
+          <div class="r42-bk"><span class="r42-t">Nudge +</span><button class="r9-btn" data-r42key="nudge+" aria-label="Nudge: inicio um tempo depois"></button></div>
+          <div class="r42-bk"><span class="r42-t">Tap<br>Tempo</span><button class="r9-btn" data-r42key="tap" aria-label="Tap Tempo"></button></div>
+          <div class="r42-bk"><span class="r42-t">Set In<br>(Downbeat)</span><button class="r9-btn" data-r42key="setin" aria-label="Set In: marca o tempo forte onde o loop comeca"></button></div>
+          <div class="r42-bk"><span class="r42-t"><i class="led r9-led" id="r42-play-led"></i>Play<br>Loop</span><button class="r9-btn" data-r42key="play" aria-label="Play: toca o loop marcado"></button></div>
+          <div class="r42-bk"><span class="r42-t">Store</span><button class="r9-btn r42-red" data-r42key="store" aria-label="Store: guarda o loop na memoria"></button></div>
+        </div>
+
+        <div class="r42-tempo">
+          <div class="kc"><div class="knob r42-k-m" id="r42-target" role="slider" tabindex="0" aria-label="Target Tempo"><i></i></div><span class="r9-cap">Target<br>Tempo</span></div>
+          <div class="kc"><div class="knob r9-knob-s" id="r42-fade" role="slider" tabindex="0" aria-label="Fade"><i></i></div><span class="r9-cap">Fade</span></div>
+          <div class="kc"><div class="knob r9-knob-s" id="r42-out" role="slider" tabindex="0" aria-label="Output"><i></i></div><span class="r9-cap">Output</span></div>
+        </div>
+      </div>
+      <div class="rack-ear"><i></i><i></i></div>
+    </section>
+
+    <p class="credit">
+      DCX Studio b0.1: RJ-2000 <span id="version">b0.3</span> + RJ-950 b0.1 + RJ-42 b0.1 + DCX 404 b0.1 &middot; open source (GPL-3.0) &middot;
+      <a href="https://github.com/dcxaudio/dcx-studio#readme" target="_blank" rel="noopener">sobre</a> &middot;
+      manuais: <a href="https://github.com/dcxaudio/rj-2000/blob/main/docs/manual.md" target="_blank" rel="noopener">RJ-2000</a>,
+      <a href="https://github.com/dcxaudio/rj-950/blob/main/docs/manual.md" target="_blank" rel="noopener">950</a>,
+      <a href="https://github.com/dcxaudio/rj-42/blob/main/docs/manual.md" target="_blank" rel="noopener">42</a>,
+      <a href="https://github.com/dcxaudio/dcx-404/blob/main/docs/manual.md" target="_blank" rel="noopener">404</a>
+    </p>
+  </main>
+
+  <input type="file" id="file-pick" hidden>
+  <input type="file" id="r9-file" hidden>
+  <input type="file" id="r42-file" hidden>
+  <input type="file" id="d4-file" accept="audio/*,.wav,.aif,.aiff,.mp3,.ogg,.flac,.m4a" hidden>
+
+  <!-- dcx-core (vendor/dcx-core, v1.0.0) -->
+  <script src="vendor/dcx-core/js/dsp.js"></script>
+  <script src="vendor/dcx-core/js/decode.js"></script>
+  <script src="vendor/dcx-core/js/store.js"></script>
+  <script src="vendor/dcx-core/js/output.js"></script>
+  <script src="vendor/dcx-core/js/sampler.js"></script>
+  <script src="vendor/dcx-core/js/midi.js"></script>
+  <script src="vendor/dcx-core/js/midimap.js"></script>
+  <script src="vendor/dcx-core/js/host.js"></script>
+  <!-- RJ-2000 (vendor/rj-2000): so o SP; o core/ dele nao e usado aqui -->
+  <script src="vendor/rj-2000/js/kit.js"></script>
+  <script src="vendor/rj-2000/js/project.js"></script>
+  <script src="vendor/rj-2000/js/engine.js"></script>
+  <script src="vendor/rj-2000/js/sequencer.js"></script>
+  <script src="vendor/rj-2000/js/io.js"></script>
+  <!-- os outros aparelhos (na mesma ordem do Studio no rj-2000; o app do SP por ultimo) -->
+  <script src="vendor/rj-950/js/s950.js"></script>
+  <script src="vendor/rj-42/js/r42.js"></script>
+  <script src="vendor/dcx-404/js/fx.js"></script>
+  <script src="vendor/dcx-404/js/dcx404.js"></script>
+  <script src="vendor/rj-2000/js/app.js"></script>
+  <script src="js/layout.js"></script>
+  <script>
+    // DCX Studio: um host so ("studio"), com o rack completo. Cada aparelho recebe a vista dele.
+    // As chaves salvas sao as mesmas do Studio que morava no rj-2000 (studio/rj2000/autosave...).
+    window.addEventListener("DOMContentLoaded", () => {
+      let sp = null;
+      const studio = new RJ.Host({
+        page: "studio",
+        // primeira abertura: o que estava salvo antes do host vem para o Studio (as antigas ficam)
+        migrate: { autosave: "studio/rj2000/autosave", autosave950: "studio/rj950/autosave", autosave42: "studio/rj42/autosave", midimap: "studio/midimap" },
+        playing: () => sp.seq.playing,
+        padUsed: i => !!sp.p.sounds[i].pcm,
+      });
+      sp = new RJ.App(studio.view("rj2000"));
+      // o rack que fica embaixo: recebe as notas dos pads, como pelo MIDI
+      const s950 = new RJ.S950(studio.view("rj950"));
+      // o looper, mais embaixo: tira loops de musicas e manda para o SP ou para o 950
+      const r42 = new RJ.R42(studio.view("rj42"));
+      studio.add("rj2000", sp, { label: "RJ-2000 pad", receive: f => sp.receive(f) });
+      studio.add("rj950", s950, { label: "RJ-950", receive: f => { if (!s950.on) return "off"; s950.loadFile(f); } });
+      studio.add("rj42", r42, { label: "RJ-42" });
+      // o DCX 404, embaixo do 42: sampler de performance e efeitos (store studio/dcx404/)
+      const d404 = new RJ.D404(studio.view("dcx404"));
+      studio.add("dcx404", d404, { label: "DCX 404", receive: f => d404.receive(f) });
+      sp.build(); s950.build(); r42.build(); d404.build(document.getElementById("d4"));
+
+      // Source RJ-2000 no 404: a saida do SP passa pelo 404 e sai do limitador direto
+      // (dry: false), sem soar duplo. Line, desligado ou o 404 apagado: volta ao normal.
+      let unroute = null;
+      const syncRoute = () => {
+        const want = studio.on && d404.on && d404.src === "rj2000";
+        if (want && !unroute) unroute = studio.route("rj2000", "dcx404", { dry: false });
+        else if (!want && unroute) { unroute(); unroute = null; }
+      };
+      const applyInput = d404.applyInput.bind(d404);
+      d404.applyInput = () => { applyInput(); syncRoute(); };
+
+      // BPM: enquanto o sequenciador do SP toca, o 404 (Sub Pad, Delay, DJFX) segue o tempo dele
+      const followBpm = () => {
+        if (!sp.seq.playing || !d404.on) return;
+        const bpm = Math.max(40, Math.min(240, Math.round(sp.seq.tempo)));
+        if (bpm !== d404.st.bpm) { d404.st.bpm = bpm; d404.applyBpm(); d404.render(); }
+      };
+      sp.seq.on("transport", followBpm);
+      sp.seq.on("position", followBpm);
+
+      RJ.studio = studio; RJ.app = sp; RJ.d404 = d404;
+    });
+  </script>
+</body>
+</html>

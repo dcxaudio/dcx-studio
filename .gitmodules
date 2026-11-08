@@ -1,0 +1,15 @@
+[submodule "vendor/dcx-core"]
+	path = vendor/dcx-core
+	url = https://github.com/dcxaudio/dcx-core.git
+[submodule "vendor/rj-2000"]
+	path = vendor/rj-2000
+	url = https://github.com/dcxaudio/rj-2000.git
+[submodule "vendor/rj-950"]
+	path = vendor/rj-950
+	url = https://github.com/dcxaudio/rj-950.git
+[submodule "vendor/rj-42"]
+	path = vendor/rj-42
+	url = https://github.com/dcxaudio/rj-42.git
+[submodule "vendor/dcx-404"]
+	path = vendor/dcx-404
+	url = https://github.com/dcxaudio/dcx-404.git
