@@ -29,7 +29,7 @@ Cada aparelho é um submódulo em `vendor/`, preso numa versão. O `index.html` 
 | Submódulo | Versão | O que o Studio usa |
 |---|---|---|
 | [dcx-core](https://github.com/dcxaudio/dcx-core) | v1.1.0 | `js/`, `css/base.css` e `fonts/` |
-| [rj-2000](https://github.com/dcxaudio/rj-2000) | `47dde3e` (b0.3) | só o SP: `js/` (sem o `core/` dele) e `css/rj2000.css` |
+| [rj-2000](https://github.com/dcxaudio/rj-2000) | `dbb98a9` (saídas por banco A-D) | só o SP: `js/` (sem o `core/` dele) e `css/rj2000.css` |
 | [rj-950](https://github.com/dcxaudio/rj-950) | `0cdf297` (b0.1) | `js/s950.js` e `css/rj950.css` |
 | [rj-42](https://github.com/dcxaudio/rj-42) | `49d4e9c` (b0.1) | `js/r42.js` e `css/rj42.css` |
 | [dcx-404](https://github.com/dcxaudio/dcx-404) | `b0125f2` (b0.1) | `js/fx.js`, `js/dcx404.js` e `css/dcx404.css` |
