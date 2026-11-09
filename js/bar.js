@@ -18,16 +18,34 @@
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
   const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  // o disquete do RJ-1202 entra na lista so quando o mixer esta no Studio (m.mixer)
   const DISKS = [
     { id: "rj2000", label: "RJ-2000", file: "rj-2000.json" },
     { id: "rj950", label: "RJ-950", file: "rj-950.json" },
     { id: "rj42", label: "RJ-42", file: "rj-42.json" },
     { id: "dcx404", label: "DCX 404", file: "dcx-404.json" },
   ];
+  const NUM = ["zero", "um", "dois", "tres", "quatro", "cinco", "seis"];
   const slug = s => (String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-+|-+$/g, "").toLowerCase()) || "projeto";
 
   RJ.studioBar = function (m) {
-    const { studio, sp, s950, r42, d404 } = m;
+    const { studio, sp, s950, r42, d404, mixer } = m;
+    const diskLi1202 = $("[data-disk=rj1202]"), projEm = $("#h-proj em"), projFoot = $("#h-proj ~ .foot");
+    const diskCount = () => {
+      if (projEm) projEm.textContent = "um arquivo .zip, " + NUM[DISKS.length] + " disquetes";
+      if (projFoot) projFoot.textContent = "Cada par de botoes salva ou carrega so aquela maquina (um arquivo .json). Salvar projeto junta " + (DISKS.length === 4 ? "os quatro" : "os " + NUM[DISKS.length]) + " mais o indice num .zip.";
+    };
+    if (mixer) {
+      DISKS.push({ id: "rj1202", label: "RJ-1202", file: "rj-1202.json" });
+      diskLi1202.hidden = false; diskCount();
+      // se o mixer nao ligou, o projeto segue sem o disquete dele
+      mixer.whenWorking.then(ok => {
+        if (ok) return;
+        const i = DISKS.findIndex(d => d.id === "rj1202");
+        if (i >= 0) DISKS.splice(i, 1);
+        diskLi1202.hidden = true; diskCount();
+      });
+    }
     const eng = studio.engine;
     const cfgEl = $("#cfg"), cfgBtn = $("#cfg-btn");
 
@@ -54,6 +72,7 @@
 
     /* ================================================================ master, limitador, VU */
     let master = null, tape = null, anL = null, anR = null;
+    let mixerOn = false;      // o RJ-1202 ligou: o slider TAPE da barra sai e o Tape e o do mixer
     const identity = new Float32Array([-1, 1]);
     function buildAudio(ctx) {
       if (master && master.context === ctx) return;
@@ -77,7 +96,8 @@
     if (eng.ctx) buildAudio(eng.ctx);
 
     function applyAudio() {
-      if (tape) tape.setDrive(cfg.tape / 100);
+      // com o RJ-1202 funcionando, o Tape e o do master do mixer: o da barra fica em 0 (a copia exata do som)
+      if (tape) tape.setDrive(mixerOn ? 0 : cfg.tape / 100);
       if (master) master.gain.setTargetAtTime(cfg.master / 100, master.context.currentTime, 0.01);
       if (eng.limiter && eng.limiter.rjCurve) eng.limiter.curve = cfg.limiter ? eng.limiter.rjCurve : identity;
       applyOutput();
@@ -95,7 +115,17 @@
       }
     }
 
-    const tape$ = $("#bar-tape"), tapeO = $("#bar-tape-o");
+    const tape$ = $("#bar-tape"), tapeO = $("#bar-tape-o"), tapeBox = tape$.closest(".tape");
+    if (mixer) {
+      Promise.all([loaded, mixer.whenWorking]).then(([, ok]) => {
+        if (!ok) return;
+        mixerOn = true;
+        tapeBox.hidden = true;
+        // o valor de Tape que ficou salvo na barra de antes do mixer passa para o Tape do master do mixer (uma vez)
+        if (cfg.tape > 0) { if (mixer.dev.st.tape === 0) mixer.legacyTape(cfg.tape); cfg.tape = 0; saveCfg(); syncUI(); }
+        applyAudio();
+      });
+    }
     tape$.addEventListener("input", () => { cfg.tape = +tape$.value; tapeO.textContent = cfg.tape; applyAudio(); });
     tape$.addEventListener("change", saveCfg);
     const master$ = $("#cfg-master"), masterO = $("#cfg-master-o"), sw = $("[data-ctrl=limitador]"), limO = $("#cfg-lim-o");
@@ -324,10 +354,25 @@
         raw: "dcx404",
       },
     };
+    if (mixer) {
+      const M = window.RJ1202;
+      A.rj1202 = {
+        ready: () => mixer.working,
+        get: () => ({ state: JSON.parse(JSON.stringify(mixer.dev.st)) }),
+        set(d) {
+          if (!d || !d.state) throw new Error("Nao e um disquete do RJ-1202");
+          mixer.dev.applyState(d.state); mixer.dev.saveNow();
+        },
+        empty: () => JSON.stringify(M.sanitize(mixer.dev.st)) === JSON.stringify(M.defaultState()),
+        info: () => mixer.dev.st.ch.map(c => M.SOURCES[M.srcIndex(c.src)].name).join(", ") + (mixer.dev.st.tape > 0.001 ? ", Tape " + mixer.tape100() : ""),
+        raw: "rj1202",
+      };
+    }
     const machine = { rj2000: sp, rj950: s950, rj42: r42, dcx404: d404 };
+    if (mixer) machine.rj1202 = mixer.dev;
 
     // estado de cada disquete: vazio, alterado (mexeu desde o ultimo salvar/carregar) ou salvo
-    const saved = { rj2000: false, rj950: false, rj42: false, dcx404: false };
+    const saved = { rj2000: false, rj950: false, rj42: false, dcx404: false, rj1202: false };
     let quiet = 0;
     Object.keys(machine).forEach(id => {
       const dev = machine[id], orig = dev.dirty.bind(dev);
@@ -402,13 +447,13 @@
     $("[data-ctrl=salvar]").addEventListener("click", () => {
       try {
         DISKS.forEach(d => need(A[d.id].ready(), d.label));
-        const files = [], index = { format: "dcx-studio-project", version: 1, name: projName, tape: cfg.tape, saved: new Date().toISOString(), disks: [] };
+        const files = [], index = { format: "dcx-studio-project", version: 1, name: projName, tape: mixerOn ? mixer.tape100() : cfg.tape, saved: new Date().toISOString(), disks: [] };
         DISKS.forEach(d => { files.push({ name: d.file, data: JSON.stringify(wrap(d.id)) }); index.disks.push({ machine: d.id, label: d.label, file: d.file, summary: A[d.id].empty() ? "vazio" : A[d.id].info() }); });
         files.unshift({ name: "projeto.json", data: JSON.stringify(index, null, 1) });
         download(RJ.zip.make(files), slug(projName) + ".zip");
         DISKS.forEach(d => { saved[d.id] = true; });
         updateDot();
-        say("Projeto \"" + projName + "\" salvo: 4 disquetes e o indice.");
+        say("Projeto \"" + projName + "\" salvo: " + NUM[DISKS.length] + " disquetes e o indice.");
       } catch (e) { console.warn(e); say(e.message, true); }
     });
     $("[data-ctrl=carregar]").addEventListener("click", () => pick(".zip,application/zip", async f => {
@@ -430,7 +475,11 @@
         if (!jobs.length) throw new Error("O projeto nao tem nenhum disquete.");
         if (DISKS.some(d => stateOf(d.id) === "alterado") && !confirm("Carregar o projeto troca o estado das maquinas. Continuar?")) return;
         jobs.forEach(([d, data]) => applyDisk(d.id, data));
-        if (index.tape != null) { cfg.tape = clamp(Math.round(+index.tape || 0), 0, 100); syncUI(); applyAudio(); saveCfg(); }
+        if (index.tape != null) {
+          // com o mixer, o Tape do projeto so vale para zip de antes do mixer (sem o disquete do RJ-1202): vai para o Tape do master do mixer
+          if (mixerOn) { if (!jobs.some(j => j[0].id === "rj1202")) mixer.legacyTape(index.tape); }
+          else { cfg.tape = clamp(Math.round(+index.tape || 0), 0, 100); syncUI(); applyAudio(); saveCfg(); }
+        }
         if (index.name) setProjName(index.name);
         say("Projeto \"" + projName + "\" carregado: " + jobs.map(j => j[0].label).join(", ") + "." + (skipped.length ? " Faltou: " + skipped.join(", ") + "." : ""), !!skipped.length);
       } catch (e) { console.warn(e); say(e instanceof SyntaxError ? "O projeto esta danificado." : e.message, true); }

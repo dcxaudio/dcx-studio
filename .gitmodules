@@ -13,3 +13,6 @@
 [submodule "vendor/dcx-404"]
 	path = vendor/dcx-404
 	url = https://github.com/dcxaudio/dcx-404.git
+[submodule "vendor/rj-1202"]
+	path = vendor/rj-1202
+	url = https://github.com/dcxaudio/rj-1202.git

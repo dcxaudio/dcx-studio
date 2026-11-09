@@ -10,3 +10,7 @@
 
 /* maquina selecionada para os pads do MIDI (js/select.js) */
 .pad-sel { outline: 2px solid #e8a33d; outline-offset: 3px; }
+
+/* o mixer RJ-1202: uma faixa logo acima da barra de baixo (js/rj1202-studio.js) */
+.m12-slot { margin-top: 18px; }
+.m12-pages { display: none; }   /* as paginas A/B de canais so valem na grade nova (layout desktop, ainda nao aplicado) */
