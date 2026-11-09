@@ -3,24 +3,19 @@
  * (pads 1-16) ou o DCX 404 (pads 1-16). Selecionada = a ultima clicada ou focada
  * (pointerdown ou foco dentro do painel dela); o padrao e o RJ-2000. Uma marca
  * (contorno ambar, classe .pad-sel) mostra qual e.
- * O RJ-1202 (mixer) tambem pode ser selecionado (contorno ambar), mas nao tem pads:
- * os pads seguem na ultima maquina com pads (api.padSel) e as teclas das outras
- * maquinas nao mudam (Shift continua so do 404).
  * O mapa padrao fica sempre ligado: o MIDI Learn vem antes (host.midi.onMessage)
  * e nao desliga estas notas. Este mapa entra na frente do mapa padrao do SP.
  * A tecla Shift do computador faz o Shift do 404 (segurando) quando ele e o selecionado.
  * Notas fora de 36-51 no canal 10 seguem para o mapa padrao do RJ-2000 como antes. */
 RJ.padSelect = function (o) {
   "use strict";
-  const { studio, sp, d404, mixer } = o;
+  const { studio, sp, d404 } = o;
   const CH = 10, NOTE0 = 36;
-  const boxes = { rj2000: document.querySelector(".studio-top .case"), dcx404: document.getElementById("d4") };
-  if (mixer) boxes.rj1202 = mixer.el;
-  const api = { sel: "rj2000", padSel: "rj2000", select, held: new Map() };
+  const boxes = { rj2000: document.querySelector(".studio-top > .case"), dcx404: document.getElementById("d4") };
+  const api = { sel: "rj2000", select, held: new Map() };
   function select(id) {
     if (!boxes[id]) return;
     api.sel = id;
-    if (id !== "rj1202") api.padSel = id;
     if (id !== "dcx404") d404.setShiftKey(false);   // trocou de maquina com Shift apertado: solta o do 404
     Object.keys(boxes).forEach(k => boxes[k] && boxes[k].classList.toggle("pad-sel", k === id));
   }
@@ -47,7 +42,7 @@ RJ.padSelect = function (o) {
     if (!studio.on) return "Off";
     const on = st === 0x90 && d[2] > 0;
     // a nota solta vai para a maquina que recebeu o toque, mesmo se a selecao mudou no meio
-    const id = on ? api.padSel : (api.held.get(n) || api.padSel);
+    const id = on ? api.sel : (api.held.get(n) || api.sel);
     if (on) api.held.set(n, id); else api.held.delete(n);
     if (id === "dcx404") {
       const el = d404.padEls[n];

@@ -32,7 +32,6 @@ body { padding-bottom: calc(var(--bar-h) + 8px + env(safe-area-inset-bottom)); }
 .sbar .proj .dirty { width: 6px; height: 6px; border-radius: 50%; background: var(--led-on); align-self: center; box-shadow: 0 0 4px var(--led-on); }
 .sbar .sp { flex: 1; }
 
-.tape[hidden] { display: none; }
 .tape { display: flex; align-items: center; gap: 8px; flex: none; }
 .tape .lbl { font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--bar-dim); }
 .tape input[type=range] { width: 84px; }
@@ -68,7 +67,6 @@ body { padding-bottom: calc(var(--bar-h) + 8px + env(safe-area-inset-bottom)); }
 .btn:hover { border-color: var(--bar-ink); }
 
 .disks { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-.disk[hidden] { display: none; }
 .disk { display: grid; grid-template-columns: 26px 1fr auto auto; align-items: center; gap: 10px; padding: 7px 8px; border-radius: 4px; background: var(--field); }
 .disk .fl { width: 22px; height: 22px; color: var(--bar-dim); }
 .disk[data-state="salvo"] .fl { color: var(--bar-ink); }
