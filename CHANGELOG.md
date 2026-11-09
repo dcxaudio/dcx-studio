@@ -2,6 +2,8 @@
 
 ## Próxima
 
+- **Corrigido:** o VU da barra mexia sozinho, com tudo parado. O canal 5 do RJ-1202 vem com a fonte Line e, se o navegador já tinha a permissão do microfone, o Studio abria o microfone ao ligar, e o ruído da sala entrava no master. Agora o microfone só abre quando você escolhe Line na fonte de um canal (`js/rj1202-studio.js`); um projeto carregado ou o padrão do canal 5 não abrem o microfone sozinhos.
+
 - **RJ-1202, o mixer, no Studio** (`js/rj1202-studio.js`, `vendor/rj-1202`): uma faixa nova logo acima da barra de baixo, com 5 canais, EQ, Aux, retornos e Tape no master. Cada canal escolhe a fonte de verdade: RJ-2000 inteiro, banco A, B, C ou D (saídas novas do RJ-2000), RJ-950, DCX 404 ou Line (o microfone só abre quando você escolhe Line; um projeto carregado só abre se o navegador já tinha a permissão). Fonte num canal sai do caminho direto, trocar a fonte desfaz a rota antiga, e o RJ-42 entra direto no master do mixer. Sem a pasta `vendor/rj-1202` o Studio abre como antes, sem o mixer (e o navegador mostra 404 nos arquivos dele).
 - **404 e mixer:** o Aux 1 do mixer entra no 404 e a saída dele volta pelo Return 1; com o 404 como fonte de um canal, o Aux 1 daquele canal fica em zero. A Source do 404 (off, RJ-2000, RJ-950, Mix, Line) continua igual, só que o RJ-2000 inteiro e o RJ-950 que já estão num canal não entram no 404 pela Source (chegam pelo Aux 1), para não tocar em dobro. O visual do 404 não mudou.
 - **Tape:** quando o mixer liga, o slider TAPE da barra sai e o Tape é o do master do mixer. O valor antigo da barra (e o `tape` de um projeto .zip de antes do mixer) passa para o Tape do mixer; o `studio/bar` e o `projeto.json` continuam abrindo sem erro.

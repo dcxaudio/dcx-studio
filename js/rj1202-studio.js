@@ -80,15 +80,15 @@
       if (m.onChange) m.onChange();
     }
 
-    // o usuario escolheu Line: pode abrir o microfone (e o navegador pergunta). Um estado carregado so abre se a
-    // permissao ja foi dada, para o Studio nao pedir o microfone sozinho.
+    // o microfone so abre depois que o usuario ESCOLHE Line (clicar na fonte do canal) nesta pagina. O padrao do
+    // canal 5 e Line e um projeto carregado pode trazer Line, mas isso NAO abre o microfone sozinho, mesmo com a
+    // permissao ja dada: senao o ruido da sala entra no master e o VU da barra mexe sem ninguem tocar.
     let userLine = false;
     const setSource = dev.setSource.bind(dev);
     dev.setSource = function (ch, id, quiet) { if (id === "line" && !quiet) userLine = true; return setSource(ch, id, quiet); };
     let mic = null, micBusy = false;
     async function micAllowed() {
-      if (userLine) return true;
-      try { return (await navigator.permissions.query({ name: "microphone" })).state === "granted"; } catch (e) { return false; }
+      return userLine;
     }
     async function syncLine() {
       const want = used.has("line");
