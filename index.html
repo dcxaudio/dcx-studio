@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="css/studio.css?v=p1">
   <!-- a grade do rack em duas colunas (js/layout2.js) -->
   <link rel="stylesheet" href="css/layout2.css?v=p1">
-  <link rel="stylesheet" href="css/bar.css">
+  <link rel="stylesheet" href="css/bar.css?v=t1">
   <!-- o painel do RJ-1202: por ultimo; as regras emprestadas das outras maquinas ficam dentro de .m12 -->
   <link rel="stylesheet" href="vendor/rj-1202/css/rj1202.css">
 </head>
@@ -518,9 +518,13 @@
   <!-- abrir.js: a conversao do disquete (16 pads antigos -> A1-A12 e B1-B4; 60 pads novos; patterns), usada pelo js/bar.js -->
   <script src="vendor/dcx-404/novo/js/abrir.js?v=p1"></script>
   <!-- o Pattern Sequencer na face: js/seq404.js segura o DOMContentLoaded do sequencer-ui.js ate o 404 do Studio existir.
-       O solo.js e o teclado.js do 404 nao entram: sao a pagina solo (host, tela LIGAR, aviso, barra do Learn, teclas) -->
+       O solo.js do 404 nao entra: e a pagina solo (host, tela LIGAR, aviso, barra do Learn) -->
   <script src="js/seq404.js?v=1"></script>
   <script src="vendor/dcx-404/novo/js/sequencer-ui.js?v=p1"></script>
+  <!-- o teclado do computador no 404, so com ele selecionado: js/teclado404.js embrulha os listeners do teclado.js do 404
+       (mapa e Learn por teclado) e refaz os pads/Z-V do solo.js; liga em RJ.studioKeys404.start(), depois do 404 montado -->
+  <script src="js/teclado404.js?v=t1"></script>
+  <script src="vendor/dcx-404/novo/js/teclado.js?v=t1"></script>
   <script src="vendor/rj-2000/js/app.js"></script>
   <!-- RJ-1202 (vendor/rj-1202): o mixer; sem a pasta o Studio segue sem ele -->
   <script src="vendor/rj-1202/js/mixer.js"></script>
@@ -528,7 +532,7 @@
   <script src="vendor/rj-1202/js/rj1202.js"></script>
   <script src="js/layout2.js?v=p1"></script>
   <script src="js/zip.js"></script>
-  <script src="js/select.js?v=p1"></script>
+  <script src="js/select.js?v=t1"></script>
   <script src="js/rj1202-studio.js?v=p1"></script>
   <script src="js/bar.js?v=p1"></script>
   <script>
@@ -598,10 +602,12 @@
       sp.seq.on("transport", followBpm);
       sp.seq.on("position", followBpm);
 
-      RJ.padSelect({ studio, sp, d404, mixer });
+      const sel = RJ.padSelect({ studio, sp, d404, mixer });
       RJ.studio = studio; RJ.app = sp; RJ.d404 = d404; RJ.mixer = mixer;
       // o Pattern Sequencer do 404 (js/seq404.js): so com a face nova montada
       if (face404 && RJ.studioSeq404) RJ.studioSeq404.start();
+      // o teclado do computador no 404 (js/teclado404.js): so com a face nova e so com o 404 selecionado
+      if (face404 && RJ.studioKeys404) RJ.studioKeys404.start({ studio, sp, d404, sel });
       // barra inferior: master, VU, config de audio e MIDI, salvar/carregar projeto (js/bar.js)
       RJ.studioBar({ studio, sp, s950, r42, d404, mixer });
     });

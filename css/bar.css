@@ -138,3 +138,4 @@ select { height: 32px; border-radius: 4px; border: 1px solid var(--bar-line); ba
 @media (max-width: 440px) {
   .sbar .proj { display: none; }
 }
+.btnrow .one[aria-pressed="true"] { border-color: var(--bar-ink); background: rgba(232, 163, 61, .18); }

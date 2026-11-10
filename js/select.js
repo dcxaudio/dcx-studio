@@ -6,9 +6,10 @@
  * DCX 404 com a face nova (12 pads x 5 bancos): notas 36-47 = os 12 pads do banco atual,
  * 48 Hold, 49 Sub Pad, 50 banco anterior, 51 proximo banco (o mesmo mapa da pagina solo da
  * face nova, vendor/dcx-404/novo/js/solo.js). Com a face antiga (16 pads) as 16 notas sao pads.
- * O RJ-1202 (mixer) tambem pode ser selecionado (contorno ambar), mas nao tem pads:
- * os pads seguem na ultima maquina com pads (api.padSel) e as teclas das outras
- * maquinas nao mudam (Shift continua so do 404).
+ * O RJ-1202 (mixer), o RJ-950 e o RJ-42 tambem podem ser selecionados (contorno ambar), mas nao
+ * tem pads do controlador: os pads seguem na ultima maquina com pads (api.padSel: RJ-2000 ou 404)
+ * e as teclas das outras maquinas nao mudam. O teclado do computador no 404 (js/teclado404.js) e o
+ * Shift so valem com o 404 selecionado (api.sel === "dcx404").
  * O mapa padrao fica sempre ligado: o MIDI Learn vem antes (host.midi.onMessage)
  * e nao desliga estas notas. Este mapa entra na frente do mapa padrao do SP.
  * A tecla Shift do computador faz o Shift do 404 (segurando) quando ele e o selecionado.
@@ -18,12 +19,14 @@ RJ.padSelect = function (o) {
   const { studio, sp, d404, mixer } = o;
   const CH = 10, NOTE0 = 36;
   const boxes = { rj2000: document.querySelector(".unit .case"), dcx404: document.getElementById("d4") };
+  boxes.rj950 = document.getElementById("r9");
+  boxes.rj42 = document.getElementById("r42");
   if (mixer) boxes.rj1202 = mixer.el;
   const api = { sel: "rj2000", padSel: "rj2000", select, held: new Map() };
   function select(id) {
     if (!boxes[id]) return;
     api.sel = id;
-    if (id !== "rj1202") api.padSel = id;
+    if (id === "rj2000" || id === "dcx404") api.padSel = id;
     if (id !== "dcx404") d404.setShiftKey(false);   // trocou de maquina com Shift apertado: solta o do 404
     Object.keys(boxes).forEach(k => boxes[k] && boxes[k].classList.toggle("pad-sel", k === id));
   }
