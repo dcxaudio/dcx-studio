@@ -1,8 +1,8 @@
 /* DCX Studio - o RJ-1202 (mixer) no rack
  *
- * RJ.studioMixer({ studio, sp, s950, r42, d404, onChange }) monta o RJ-1202 numa faixa nova (#m12-slot, logo
- * acima da barra de baixo) e liga as fontes dos canais. Sem vendor/rj-1202 (o submodulo ainda nao existe no
- * Studio real) devolve null e o Studio segue como antes, sem mixer.
+ * RJ.studioMixer({ studio, sp, s950, r42, d404, onChange }) monta o RJ-1202 no #m12-slot (na grade v2, embaixo do
+ * DCX 404; js/layout2.js da a escala e as paginas A/B de canais) e liga as fontes dos canais. Sem vendor/rj-1202
+ * (o submodulo ainda nao existe no Studio real) devolve null e o Studio segue como antes, sem mixer.
  *
  * Fontes por canal (cada uma sai do caminho direto enquanto estiver num canal; trocar a fonte desfaz a rota antiga):
  *   RJ-2000 inteiro   host.output("rj2000")      (o que nao esta num banco roteado)

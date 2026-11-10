@@ -1,16 +1,7 @@
-/* DCX Studio - o topo do rack
- * O RJ-2000 e o DCX 404 ficam lado a lado (.studio-top.side), cada um com a sua
- * escala (zoom), para caberem juntos na tela sem rolar. Quem calcula e o
- * js/layout.js. Sem a classe .side (tela estreita), os dois ficam empilhados como
- * blocos normais: o RJ-2000, o 404 e, depois, o 950 e o 42.
+/* DCX Studio - o que e so do Studio (fora da grade)
+ * A grade do rack (colunas, escalas, paginas do mixer) fica em css/layout2.css + js/layout2.js.
+ * O js/layout.js antigo (RJ-2000 + 404 lado a lado, .studio-top.side) nao e carregado nesta pagina.
  */
-.studio-top.side { display: flex; align-items: flex-start; justify-content: center; gap: 16px; }
-.studio-top.side > .case { flex: none; zoom: var(--sp-scale, 1); }
-.studio-top.side > .d4-scroll { flex: none; width: auto; padding: 0; overflow: visible; }
 
 /* maquina selecionada para os pads do MIDI (js/select.js) */
 .pad-sel { outline: 2px solid #e8a33d; outline-offset: 3px; }
-
-/* o mixer RJ-1202: uma faixa logo acima da barra de baixo (js/rj1202-studio.js) */
-.m12-slot { margin-top: 18px; }
-.m12-pages { display: none; }   /* as paginas A/B de canais so valem na grade nova (layout desktop, ainda nao aplicado) */

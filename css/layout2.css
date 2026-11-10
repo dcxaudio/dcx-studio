@@ -1,0 +1,41 @@
+/* DCX Studio - a grade do rack (layout v2, desktop; js/layout2.js calcula as escalas)
+ *
+ * #grid tem duas colunas: .col-1 (RJ-2000, RJ-950, RJ-42; largura de layout ~1150 px e zoom s1) e
+ * .col-2 (DCX 404 dentro da .d4-box, com --d4-scale, e, embaixo, o RJ-1202 com --m12-scale). Em janela
+ * estreita (#grid[data-mode="stack"]) as colunas empilham. O mixer em paginas (.m12[data-page]) esconde
+ * os canais da outra pagina; Aux e Main ficam sempre.
+ * Carregar depois do css/studio.css e antes do css/bar.css.
+ */
+.unit { max-width: none; padding: 24px 16px 16px; }
+.grid { display: flex; justify-content: center; align-items: flex-start; gap: 16px; }
+.grid[data-mode="stack"] { flex-direction: column; align-items: center; }
+.col { display: flex; flex-direction: column; flex: none; min-width: 0; max-width: 100%; }
+.col-1 { width: 1150px; }                  /* largura de layout do gabinete; o js ajusta e da o zoom (s1) */
+.grid[data-mode="stack"] .col-1 { width: 100%; }
+.col-1 > .rack { margin-top: 16px; }       /* o mesmo espaco das colunas (base.css: 18) */
+.col-2 { align-items: center; gap: 16px; }
+.grid[data-mode="stack"] .col-2 { width: 100%; }
+
+/* o DCX 404 (face nova, 660 x 988): reduzido so por escala uniforme, a partir do canto superior esquerdo
+   (nada do layout interno muda); a .d4-box tem o tamanho ja escalado (o js poe width/height), sem vazio nem corte */
+.d4-box { flex: none; width: 660px; height: 988px; position: relative; }
+.d4-box > #d4.dx { position: absolute; left: 0; top: 0; transform: scale(var(--d4-scale, 1)); transform-origin: 0 0; }
+.dx-missing { display: grid; place-items: center; padding: 24px; }
+.dx-missing-msg { margin: 0; max-width: 40ch; text-align: center; font: 14px/1.5 var(--font); color: #30312f; }
+
+/* o RJ-1202 na coluna 2: sem a faixa rolavel da pagina solo */
+.m12-slot { margin: 0; width: 100%; }
+.m12-slot[hidden] { display: none; }
+.m12-slot .m12-scroll { width: 100%; padding: 0; overflow: visible; display: flex; justify-content: center; }
+
+/* paginas de canais do mixer (A: 1-3, B: 4-5), so quando o js/layout2.js poe data-page no .m12 */
+.m12-pages { display: none; }
+.m12[data-page] .m12-pages { display: inline-flex; gap: 4px; margin: 0 0 3px 6px; }
+.m12-pages button { font-family: var(--font); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; padding: 3px 8px;
+  border-radius: 2px; border: 1px solid #4c4f52; background: #1c1d1e; color: var(--rack-ink); cursor: pointer; }
+.m12-pages button.on { background: var(--rack-ink); color: #1c1d1e; border-color: var(--rack-ink); }
+.m12[data-page] { width: 774px; }
+.m12[data-page="A"] .m12-ch:nth-child(n+4), .m12[data-page="B"] .m12-ch:nth-child(-n+3) { display: none; }
+.m12[data-page="B"] .m12-ch:nth-child(4) { border-left: 0; }
+
+.credit { margin-top: 20px; }

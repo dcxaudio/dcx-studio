@@ -320,29 +320,43 @@
         info: () => { const n = r42.st.slots.filter(Boolean).length; return n + (n === 1 ? " loop" : " loops"); },
         raw: "rj42",
       },
+      // DCX 404 com a face nova: 12 pads x 5 bancos = 60 pads guardados (A1-E12). O disquete leva todos
+      // (pads[i], i = banco * 12 + pad), mais layout { pads, banks }. O disquete antigo do Studio (16 pads)
+      // abre igual: o pad guardado i vai para o pad guardado i, entao 1-12 viram A1-A12 e 13-16 viram B1-B4
+      // (a mesma conversao da pagina solo da face nova, vendor/dcx-404/novo/js/abrir.js: RJ.d4Open.apply).
       dcx404: {
         ready: () => !!d404.loaded,
         get() {
+          const D = RJ.D404 || {};
           return {
             state: JSON.parse(d404.serialize()),
+            layout: { pads: D.PADS || d404.buf.length, banks: D.BANKS || 1 },
             pads: d404.buf.map((b, i) => {
               if (!b) return null;
-              const ch = []; for (let c = 0; c < b.numberOfChannels; c++) ch.push(RJ.dsp.floatToB64(b.getChannelData(c)));
-              return { name: d404.st.pads[i].name, rate: b.sampleRate, ch };
+              const ch = []; for (let c = 0; c < Math.min(2, b.numberOfChannels); c++) ch.push(RJ.dsp.floatToB64(b.getChannelData(c)));
+              return { name: d404.st.pads[i].name || "", rate: b.sampleRate, ch };
             }),
           };
         },
         set(d) {
           if (!d || !d.state) throw new Error("Nao e um disquete do DCX 404");
           const ctx = eng.ensure();
+          if (RJ.d4Open && RJ.d4Open.apply) {
+            const r = RJ.d4Open.apply(d404, d, ctx);
+            if (r.bad) console.warn("Disquete do DCX 404: " + r.bad + " sample(s) ilegivel(is) ficaram vazios.");
+            if (r.extra) console.warn("Disquete do DCX 404: " + r.extra + " pad(s) alem dos " + d404.buf.length + " ficaram de fora.");
+            return;
+          }
+          // sem o abrir.js (vendor/dcx-404/novo ausente): a conversao direta, pad guardado i -> i
           d404.stopAll();
+          if (d404.abortRecs) d404.abortRecs();
           d404.useState(d.state);
           d404.buf.forEach((_, i) => {
-            const x = d.pads && d.pads[i];
+            const x = Array.isArray(d.pads) ? d.pads[i] : null;
             let b = null;
             if (x && x.ch && x.ch.length && x.ch[0]) {
-              const chs = x.ch.map(c => RJ.dsp.b64ToFloat(c));
-              if (chs[0].length) { b = ctx.createBuffer(chs.length, chs[0].length, x.rate); chs.forEach((c, k) => b.copyToChannel(c, k)); }
+              const chs = x.ch.slice(0, 2).map(c => RJ.dsp.b64ToFloat(c));
+              if (chs[0].length) { b = ctx.createBuffer(chs.length, chs[0].length, Number(x.rate) || ctx.sampleRate); chs.forEach((c, k) => b.copyToChannel(c.subarray(0, chs[0].length), k)); }
             }
             d404.setBuffer(i, b, null, false);
             d404.saveSample(i);
@@ -350,7 +364,14 @@
           d404.applyAll(); d404.render(); d404.saveNow();
         },
         empty: () => !d404.buf.some(Boolean) && !d404.st.fx[1] && !d404.st.fx[2],
-        info: () => { const n = d404.buf.filter(Boolean).length; return n ? n + (n === 1 ? " pad com sample" : " pads com sample") : "sem pads, so efeitos"; },
+        info: () => {
+          const P = (RJ.D404 && RJ.D404.PADS) || d404.buf.length, B = (RJ.D404 && RJ.D404.BANKS) || 1;
+          const banks = new Set();
+          let n = 0;
+          d404.buf.forEach((b, i) => { if (b) { n++; banks.add("ABCDE"[Math.floor(i / P)]); } });
+          if (!n) return "sem pads, so efeitos";
+          return n + (n === 1 ? " pad com sample" : " pads com sample") + (B > 1 ? " (" + [...banks].join(", ") + ")" : "");
+        },
         raw: "dcx404",
       },
     };
