@@ -499,6 +499,8 @@
   <script src="vendor/dcx-core/js/midi.js"></script>
   <script src="vendor/dcx-core/js/midimap.js"></script>
   <script src="vendor/dcx-core/js/host.js"></script>
+  <!-- MIDI Learn: um espaco de ids por maquina (o 404 com "d404:"), com a migracao do mapa salvo -->
+  <script src="js/learnids.js?v=l1"></script>
   <!-- RJ-2000 (vendor/rj-2000): so o SP; o core/ dele nao e usado aqui -->
   <script src="vendor/rj-2000/js/kit.js"></script>
   <script src="vendor/rj-2000/js/project.js"></script>
@@ -523,7 +525,7 @@
   <script src="vendor/dcx-404/novo/js/sequencer-ui.js?v=p1"></script>
   <!-- o teclado do computador no 404, so com ele selecionado: js/teclado404.js embrulha os listeners do teclado.js do 404
        (mapa e Learn por teclado) e refaz os pads/Z-V do solo.js; liga em RJ.studioKeys404.start(), depois do 404 montado -->
-  <script src="js/teclado404.js?v=t1"></script>
+  <script src="js/teclado404.js?v=l1"></script>
   <script src="vendor/dcx-404/novo/js/teclado.js?v=t1"></script>
   <script src="vendor/rj-2000/js/app.js"></script>
   <!-- RJ-1202 (vendor/rj-1202): o mixer; sem a pasta o Studio segue sem ele -->
@@ -558,7 +560,11 @@
       studio.add("rj950", s950, { label: "RJ-950", receive: f => { if (!s950.on) return "off"; s950.loadFile(f); } });
       studio.add("rj42", r42, { label: "RJ-42" });
       // o DCX 404, embaixo do 42: sampler de performance e efeitos (store studio/dcx404/)
-      const d404 = new RJ.D404(studio.view("dcx404"));
+      // MIDI Learn: o 404 aprende no espaco "d404:" (o REC e o TAP dele nao sobrescrevem os do RJ-2000; js/learnids.js)
+      const view404 = studio.view("dcx404");
+      view404.learn = RJ.learnSpace(studio.learn, "d404:");
+      RJ.studioLearnIds.install(studio.learn, ["d404:"]);
+      const d404 = new RJ.D404(view404);
       studio.add("dcx404", d404, { label: "DCX 404", receive: f => d404.receive(f) });
       sp.build(); s950.build(); r42.build(); d404.build(document.getElementById("d4"));
       if (RJ.studioLayout) RJ.studioLayout();
