@@ -15,6 +15,7 @@
  * Como: este arquivo carrega ANTES do teclado.js e embrulha os listeners de keydown e roda que ele registra
  * (so os dele, pelo document.currentScript) com a checagem "404 selecionado"; o DOMContentLoaded dele fica
  * guardado e roda em start(), depois do 404 do Studio montado, com um host de mentira (on, learn, midi).
+ * MIDI Learn: o 404 aprende no espaco "d404:" (js/learnids.js); o teclado.js recebe a vista do 404, com os ids sem prefixo.
  * Mapa: "studio/dcx404/keymap" (o learn do Studio guarda "keymap" la; o midimap segue em "studio/midimap").
  * Learn: o do SET-UP 22 do RJ-2000 (ou o botao Learn do mixer / MIDI Learn da config): tocar num controle do
  * 404, apertar uma tecla, Enter salva (tecla com dono: o 1o Enter avisa no LCD e o 2o troca), Delete apaga, Esc sai.
@@ -75,7 +76,10 @@
         L.store = Object.assign({}, st, { keys404: true, get: n => st.get(k(n)), put: (n, v) => st.put(k(n), v) });
       }
       // o host que o teclado.js espera (RJ.solo): so on, learn e midi
-      const host = { get on() { return studio.on; }, learn: L, midi: studio.midi };
+      // learn: a vista do 404 (js/learnids.js, ids sem o "d404:"), para o mapa de teclas seguir com os ids do 404
+      const L4 = d404.host && d404.host.learn && d404.host.learn.space ? d404.host.learn : L;
+      const bare = id => (L4 !== L && id ? L4.toBare(id) : id);
+      const host = { get on() { return studio.on; }, learn: L4, midi: studio.midi };
       const solo0 = RJ.solo;
       RJ.solo = host;
       try { held.splice(0).forEach(fn => { try { fn.call(window, new Event("DOMContentLoaded")); } catch (e) { console.warn("Teclado do 404 nao ligou", e); } }); }
@@ -166,7 +170,7 @@
             return [fit(t.name), fixed ? "Fixed Key: Other" : swap ? "Taken: Ent=Swap" : "1 Key: Ent=Save"];
           }
           if (K.cand) return [fit(t.name), fit("Key " + keyTxt(t, K.cand) + (K.isValue(t) && K.cand.length === 1 ? " +Dn" : " Ent"))];
-          const ks = K.keysOf(t.id), b = L.bound(t.id);
+          const ks = K.keysOf(bare(t.id)), b = L.bound(t.id);
           if (ks.length) return [fit(t.name), fit("Key " + keyTxt(t, ks) + (b ? " +MIDI" : ""))];
           return [fit(t.name), b ? fit("Now " + RJ.MidiMap.label(b)) : "Key or MIDI..."];
         };
