@@ -289,6 +289,8 @@
 
     /* ================================================================ os quatro aparelhos */
     const need = (cond, what) => { if (!cond) throw new Error(what + " ainda nao ligou: ligue o Studio primeiro."); };
+    // patterns gravados no 404 (Pattern Sequencer, st.seq.pats; 0 sem o sequencer)
+    const pats404 = () => { const q = d404.st && d404.st.seq; return q && q.pats ? Object.keys(q.pats).filter(k => q.pats[k] && q.pats[k].ev && q.pats[k].ev.length).length : 0; };
     const A = {
       rj2000: {
         ready: () => !!(sp.p && sp.on),
@@ -328,8 +330,11 @@
         ready: () => !!d404.loaded,
         get() {
           const D = RJ.D404 || {};
+          const state = JSON.parse(d404.serialize());
+          // patterns (st.seq, com o Protect em prot): vao no estado, com quantos pads por banco (o mesmo do RJ.d4Open.build)
+          if (state.seq && typeof state.seq === "object") state.seq.pads = D.PADS || d404.buf.length;
           return {
-            state: JSON.parse(d404.serialize()),
+            state,
             layout: { pads: D.PADS || d404.buf.length, banks: D.BANKS || 1 },
             pads: d404.buf.map((b, i) => {
               if (!b) return null;
@@ -345,7 +350,8 @@
             const r = RJ.d4Open.apply(d404, d, ctx);
             if (r.bad) console.warn("Disquete do DCX 404: " + r.bad + " sample(s) ilegivel(is) ficaram vazios.");
             if (r.extra) console.warn("Disquete do DCX 404: " + r.extra + " pad(s) alem dos " + d404.buf.length + " ficaram de fora.");
-            return;
+            // patterns: o aviso do abrir.js (disquete sem patterns, outra versao, o que ficou de fora); vai na mensagem da barra
+            return RJ.d4Open.seqMsg ? RJ.d4Open.seqMsg(r).trim() : "";
           }
           // sem o abrir.js (vendor/dcx-404/novo ausente): a conversao direta, pad guardado i -> i
           d404.stopAll();
@@ -363,14 +369,15 @@
           });
           d404.applyAll(); d404.render(); d404.saveNow();
         },
-        empty: () => !d404.buf.some(Boolean) && !d404.st.fx[1] && !d404.st.fx[2],
+        empty: () => !d404.buf.some(Boolean) && !d404.st.fx[1] && !d404.st.fx[2] && !pats404(),
         info: () => {
           const P = (RJ.D404 && RJ.D404.PADS) || d404.buf.length, B = (RJ.D404 && RJ.D404.BANKS) || 1;
           const banks = new Set();
           let n = 0;
           d404.buf.forEach((b, i) => { if (b) { n++; banks.add("ABCDE"[Math.floor(i / P)]); } });
-          if (!n) return "sem pads, so efeitos";
-          return n + (n === 1 ? " pad com sample" : " pads com sample") + (B > 1 ? " (" + [...banks].join(", ") + ")" : "");
+          const k = pats404(), pt = k ? ", " + k + (k === 1 ? " pattern" : " patterns") : "";
+          if (!n) return (k ? "sem pads" : "sem pads, so efeitos") + pt;
+          return n + (n === 1 ? " pad com sample" : " pads com sample") + (B > 1 ? " (" + [...banks].join(", ") + ")" : "") + pt;
         },
         raw: "dcx404",
       },
@@ -436,7 +443,7 @@
       if (id === "dcx404" && d && d.state) return d;
       throw new Error("Esse arquivo nao e um disquete do " + DISKS.find(x => x.id === id).label + ".");
     }
-    function applyDisk(id, data) { quiet++; try { A[id].set(data); } finally { setTimeout(() => { quiet--; }, 50); } saved[id] = true; }
+    function applyDisk(id, data) { let r; quiet++; try { r = A[id].set(data); } finally { setTimeout(() => { quiet--; }, 50); } saved[id] = true; return typeof r === "string" ? r : ""; }
 
     function saveDisk(id) {
       try {
@@ -453,8 +460,8 @@
           need(A[id].ready(), DISKS.find(d => d.id === id).label);
           const data = unwrap(id, JSON.parse(await f.text()));
           if (stateOf(id) === "alterado" && !confirm("Carregar o disquete troca o que esta no " + DISKS.find(d => d.id === id).label + ". Continuar?")) return;
-          applyDisk(id, data);
-          say("Disquete carregado no " + DISKS.find(d => d.id === id).label + ".");
+          const note = applyDisk(id, data);
+          say("Disquete carregado no " + DISKS.find(d => d.id === id).label + "." + (note ? " " + note : ""));
         } catch (e) { console.warn(e); say(/JSON/.test(e.message) ? "Esse arquivo nao e um disquete." : e.message, true); }
         updateDot();
       });
@@ -495,14 +502,14 @@
         }
         if (!jobs.length) throw new Error("O projeto nao tem nenhum disquete.");
         if (DISKS.some(d => stateOf(d.id) === "alterado") && !confirm("Carregar o projeto troca o estado das maquinas. Continuar?")) return;
-        jobs.forEach(([d, data]) => applyDisk(d.id, data));
+        const notes = jobs.map(([d, data]) => applyDisk(d.id, data)).filter(Boolean);
         if (index.tape != null) {
           // com o mixer, o Tape do projeto so vale para zip de antes do mixer (sem o disquete do RJ-1202): vai para o Tape do master do mixer
           if (mixerOn) { if (!jobs.some(j => j[0].id === "rj1202")) mixer.legacyTape(index.tape); }
           else { cfg.tape = clamp(Math.round(+index.tape || 0), 0, 100); syncUI(); applyAudio(); saveCfg(); }
         }
         if (index.name) setProjName(index.name);
-        say("Projeto \"" + projName + "\" carregado: " + jobs.map(j => j[0].label).join(", ") + "." + (skipped.length ? " Faltou: " + skipped.join(", ") + "." : ""), !!skipped.length);
+        say("Projeto \"" + projName + "\" carregado: " + jobs.map(j => j[0].label).join(", ") + "." + (skipped.length ? " Faltou: " + skipped.join(", ") + "." : "") + (notes.length ? " " + notes.join(" ") : ""), !!skipped.length);
       } catch (e) { console.warn(e); say(e instanceof SyntaxError ? "O projeto esta danificado." : e.message, true); }
       updateDot();
     }));

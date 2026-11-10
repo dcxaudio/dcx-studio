@@ -511,10 +511,16 @@
   <script src="vendor/rj-42/js/r42.js"></script>
   <!-- DCX 404 (vendor/dcx-404, main): o motor e o mesmo da pagina estavel; a face nova le #d4 (12 pads x 5 bancos) -->
   <script src="vendor/dcx-404/js/fx.js"></script>
-  <script src="vendor/dcx-404/js/fx-onda3.js"></script>
-  <script src="vendor/dcx-404/js/dcx404.js"></script>
-  <!-- abrir.js: a conversao do disquete (16 pads antigos -> A1-A12 e B1-B4; 60 pads novos), usada pelo js/bar.js -->
-  <script src="vendor/dcx-404/novo/js/abrir.js"></script>
+  <script src="vendor/dcx-404/js/fx-onda3.js?v=p1"></script>
+  <!-- sequencer.js: o relogio do Pattern Sequencer (60 patterns, st.seq); sem DOM -->
+  <script src="vendor/dcx-404/js/sequencer.js?v=p1"></script>
+  <script src="vendor/dcx-404/js/dcx404.js?v=p1"></script>
+  <!-- abrir.js: a conversao do disquete (16 pads antigos -> A1-A12 e B1-B4; 60 pads novos; patterns), usada pelo js/bar.js -->
+  <script src="vendor/dcx-404/novo/js/abrir.js?v=p1"></script>
+  <!-- o Pattern Sequencer na face: js/seq404.js segura o DOMContentLoaded do sequencer-ui.js ate o 404 do Studio existir.
+       O solo.js e o teclado.js do 404 nao entram: sao a pagina solo (host, tela LIGAR, aviso, barra do Learn, teclas) -->
+  <script src="js/seq404.js?v=1"></script>
+  <script src="vendor/dcx-404/novo/js/sequencer-ui.js?v=p1"></script>
   <script src="vendor/rj-2000/js/app.js"></script>
   <!-- RJ-1202 (vendor/rj-1202): o mixer; sem a pasta o Studio segue sem ele -->
   <script src="vendor/rj-1202/js/mixer.js"></script>
@@ -530,7 +536,7 @@
     // As chaves salvas sao as mesmas do Studio que morava no rj-2000 (studio/rj2000/autosave...).
     window.addEventListener("DOMContentLoaded", async () => {
       // a face nova do 404 entra no #d4 antes de montar qualquer aparelho (js/face404.js)
-      await RJ.face404.ready;
+      const face404 = await RJ.face404.ready;
       let sp = null;
       const studio = new RJ.Host({
         page: "studio",
@@ -594,6 +600,8 @@
 
       RJ.padSelect({ studio, sp, d404, mixer });
       RJ.studio = studio; RJ.app = sp; RJ.d404 = d404; RJ.mixer = mixer;
+      // o Pattern Sequencer do 404 (js/seq404.js): so com a face nova montada
+      if (face404 && RJ.studioSeq404) RJ.studioSeq404.start();
       // barra inferior: master, VU, config de audio e MIDI, salvar/carregar projeto (js/bar.js)
       RJ.studioBar({ studio, sp, s950, r42, d404, mixer });
     });
