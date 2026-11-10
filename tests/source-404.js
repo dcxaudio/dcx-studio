@@ -4,12 +4,12 @@
  * Mede o nivel (pico, dBFS) na ENTRADA do 404 (depois do seletor Source e do Input Level, onde a escuta e o
  * REC leem) com uma maquina tocando, para cada Source: RJ-2000 (pad do banco A, que fica num canal do RJ-1202,
  * e pad do banco C, fora do mixer), RJ-950, Mix e Line. Por ultimo grava 0,6 s no REC do 404 com Source = RJ-2000
- * e confere o buffer gravado.
+ * e confere o buffer gravado. Com o RJ-1202, tudo isso roda duas vezes: mesa LIGADA e mesa DESLIGADA (o padrao).
  *
  * O som nao vai para a caixa: durante o teste a saida do AudioContext vai para setSinkId({ type: "none" })
  * (os analisadores seguem medindo). No fim tudo volta como estava, e o pad de teste do RJ-2000 e devolvido.
  *
- * Devolve { ok, rows: [{ name, dbIn, dbMaster, want, ok }], rec: { ok, db, len } }.
+ * Devolve { ok, rows: [{ name, dbIn, dbMaster, want, ok }], rec: { ok, db, len }, recs: [{ name, ok, db, len }] }.
  * Falha (ok false) se uma Source que deve trazer a maquina mede < -60 dBFS, ou se a Line (sem microfone) traz alguma.
  */
 (function (g) {
@@ -92,26 +92,42 @@
       { name: "Line (sem microfone, nao traz as maquinas)", src: "line", play: () => { hit(0); play950(); }, want: false },
       { name: "Off (nao traz as maquinas; o canal do mixer volta a soar)", src: "off", play: () => { hit(0); play950(); }, want: false, master: true },
     ];
-    const rows = [];
+    const rows = [], recs = [];
+    // com o RJ-1202: os casos rodam com a mesa LIGADA e DESLIGADA (o padrao, sem preferencia, e desligada);
+    // no fim a mesa volta ao estado de antes do teste
+    const mx = RJ.mixer, pwrKeep = mx ? mx.powered : null;
+    // a preferencia do POWER no navegador (setPower grava): volta como estava no fim (ausente = apaga)
+    const PKEY = "dcx-studio/rj1202-power";
+    let prefKeep = null; try { prefKeep = win.localStorage.getItem(PKEY); } catch (e) { /* sem armazenamento */ }
+    const states = mx ? [true, false] : [null];
     try {
-      for (const c of cases) {
-        await setSrc(c.src);
-        if (inNode !== d.g.inLevel) { inNode = d.g.inLevel; inNode.connect(anIn); }
-        await wait(250);
-        c.play();
-        const [aIn, aM] = await Promise.all([peak(anIn, 600), peak(anMaster, 600)]);
-        await wait(700);
-        const dbIn = db(aIn), dbMaster = db(aM);
-        rows.push({ name: c.name, src: d.src, dbIn: +dbIn.toFixed(1), dbMaster: +dbMaster.toFixed(1), want: c.want, ok: (c.want ? dbIn >= FLOOR : dbIn < FLOOR) && (!c.master || dbMaster >= FLOOR) });
-      }
+      for (const st of states) {
+        const tag = st === null ? "" : st ? "Mesa ligada: " : "Mesa desligada: ";
+        if (st !== null) { await setSrc("off"); await mx.setPower(st); await wait(250); }
+        for (const c of cases) {
+          await setSrc(c.src);
+          if (inNode !== d.g.inLevel) { inNode = d.g.inLevel; inNode.connect(anIn); }
+          await wait(250);
+          c.play();
+          const [aIn, aM] = await Promise.all([peak(anIn, 600), peak(anMaster, 600)]);
+          await wait(700);
+          const dbIn = db(aIn), dbMaster = db(aM);
+          rows.push({ name: tag + c.name, src: d.src, dbIn: +dbIn.toFixed(1), dbMaster: +dbMaster.toFixed(1), want: c.want, ok: (c.want ? dbIn >= FLOOR : dbIn < FLOOR) && (!c.master || dbMaster >= FLOOR) });
+        }
 
-      // REC do 404 com Source = RJ-2000: o pad A1 toca enquanto grava; o buffer gravado nao pode ser mudo
-      await setSrc("rj2000");
-      await wait(200);
-      const rec = await recordTo(d, () => hit(0));
-      const ok = rows.every(r => r.ok) && rec.ok;
-      return { ok, rows, rec, muted };
+        // REC do 404 com Source = RJ-2000: o pad A1 toca enquanto grava; o buffer gravado nao pode ser mudo
+        await setSrc("rj2000");
+        await wait(200);
+        const rec = await recordTo(d, () => hit(0));
+        rec.name = tag + "REC do 404, Source = RJ-2000";
+        recs.push(rec);
+      }
+      const rec = recs.find(r => !r.ok) || recs[recs.length - 1];
+      const ok = rows.every(r => r.ok) && recs.every(r => r.ok);
+      return { ok, rows, rec, recs, muted };
     } finally {
+      if (mx && mx.powered !== pwrKeep) { d.src = "off"; d.applyInput(); await mx.setPower(pwrKeep); }
+      if (mx) { try { if (prefKeep === null) win.localStorage.removeItem(PKEY); else win.localStorage.setItem(PKEY, prefKeep); } catch (e) { /* sem armazenamento */ } }
       d.src = srcKeep; d.applyInput();
       [0, 16].forEach(s => { const k = keep[s]; Object.assign(k.snd, { pcm: k.pcm, start: k.start, end: k.end, loop: k.loop, ver: k.ver, mode: k.mode }); });
       try { inNode.disconnect(anIn); } catch (e) { /* ja solto */ }

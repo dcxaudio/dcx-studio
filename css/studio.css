@@ -6,6 +6,13 @@
 /* maquina selecionada para os pads do MIDI (js/select.js) */
 .pad-sel { outline: 2px solid #e8a33d; outline-offset: 3px; }
 
+/* tecla POWER do RJ-1202 (js/rj1202-studio.js): entra no .m12-pwr do painel, ao lado do LED Power.
+   Ligada = tecla afundada (.on) e LED aceso, como o Power do RJ-950. Desligada: LED apagado. */
+.m12-pwr.m12-pwr-st { gap: 8px; }
+.m12 .r9-btn.m12-pwr-key { width: 32px; height: 20px; margin-left: 2px; cursor: pointer; }
+.m12 .r9-btn.m12-pwr-key:focus-visible { outline: 2px solid #e8a33d; outline-offset: 2px; }
+.m12.m12-off .m12-main { filter: brightness(.82); }
+
 /* RJ-950: o painel vem de vendor/rj-950 (js/face950.js) e e desenhado so pelo css/rj950.css dele. Mas o
  * vendor/rj-42/css/rj42.css (carregado depois) traz regras soltas com as classes r9-* (.r9-sub, .r9-power,
  * .rack.on .r9-power, .r9-btn.down, .r9-drive, .r9-bezel, .r9-maker...), do tempo em que o 42 dividia o visual

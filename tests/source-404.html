@@ -19,7 +19,7 @@
 <body>
 <h1>Source do DCX 404 no Studio</h1>
 <p>Liga o Studio (no quadro abaixo), toca um pad do RJ-2000 (A1 e C1) e um tom no RJ-950 e mede o pico na entrada do 404 para cada Source.
-Falha se uma Source que deve trazer a maquina mede abaixo de -60 dBFS. O master fica mudo durante o teste. No fim grava o REC do 404 e confere o sample.</p>
+Falha se uma Source que deve trazer a maquina mede abaixo de -60 dBFS. O master fica mudo durante o teste. No fim grava o REC do 404 e confere o sample. Com o RJ-1202, tudo roda com a mesa ligada e com ela desligada (o padrao); no fim ela volta como estava.</p>
 <p><button id="go" type="button" disabled>Rodar o teste</button> <span id="sum"></span></p>
 <table id="out" hidden><thead><tr><th>Caso</th><th>Entrada 404 (dBFS)</th><th>Master (dBFS)</th><th></th></tr></thead><tbody></tbody></table>
 <iframe id="st" src="../index.html" title="DCX Studio"></iframe>
@@ -45,9 +45,11 @@ Falha se uma Source que deve trazer a maquina mede abaixo de -60 dBFS. O master 
         tr.innerHTML = `<td>${x.name}</td><td class="n">${fmt(x.dbIn)}</td><td class="n">${fmt(x.dbMaster)}</td><td class="${x.ok ? "ok" : "bad"}">${x.ok ? "ok" : "FALHA"}</td>`;
         tb.appendChild(tr);
       });
-      const tr = document.createElement("tr");
-      tr.innerHTML = `<td>REC do 404, Source = RJ-2000 (${r.rec.len} amostras${r.rec.err ? ", " + r.rec.err : ""})</td><td class="n">${fmt(r.rec.db)}</td><td></td><td class="${r.rec.ok ? "ok" : "bad"}">${r.rec.ok ? "ok" : "FALHA"}</td>`;
-      tb.appendChild(tr);
+      (r.recs || [r.rec]).forEach(rc => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${rc.name || "REC do 404, Source = RJ-2000"} (${rc.len} amostras${rc.err ? ", " + rc.err : ""})</td><td class="n">${fmt(rc.db)}</td><td></td><td class="${rc.ok ? "ok" : "bad"}">${rc.ok ? "ok" : "FALHA"}</td>`;
+        tb.appendChild(tr);
+      });
       document.getElementById("out").hidden = false;
       sum.textContent = r.ok ? "PASSOU" : "FALHOU";
       sum.className = r.ok ? "ok" : "bad";

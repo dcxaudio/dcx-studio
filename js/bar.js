@@ -119,12 +119,27 @@
     if (mixer) {
       Promise.all([loaded, mixer.whenWorking]).then(([, ok]) => {
         if (!ok) return;
-        mixerOn = true;
-        tapeBox.hidden = true;
         // o valor de Tape que ficou salvo na barra de antes do mixer passa para o Tape do master do mixer (uma vez)
-        if (cfg.tape > 0) { if (mixer.dev.st.tape === 0) mixer.legacyTape(cfg.tape); cfg.tape = 0; saveCfg(); syncUI(); }
-        applyAudio();
+        // (cfg.m12: ja passou; depois disso o TAPE da barra e o da mesa desligada e nao migra mais)
+        if (!cfg.m12) { if (cfg.tape > 0) { if (mixer.dev.st.tape === 0) mixer.legacyTape(cfg.tape); cfg.tape = 0; syncUI(); } cfg.m12 = 1; saveCfg(); }
+        // mesa desligada (POWER do RJ-1202): o Studio volta a ser o de antes dela, com o TAPE da barra no master
+        const pwr = () => { mixerOn = mixer.powered; tapeBox.hidden = mixerOn; applyAudio(); };
+        mixer.onPower(pwr); pwr();
       });
+    }
+    // abaixa o master (~25 ms), faz fn() e sobe de volta: trocar o caminho do som (POWER da mesa) sem estalo
+    function duck(fn) {
+      const ctx = master && master.context;
+      if (!ctx || ctx.state !== "running") { fn(); return Promise.resolve(); }
+      const g = master.gain, t = ctx.currentTime;
+      g.cancelScheduledValues(t); g.setValueAtTime(g.value, t); g.linearRampToValueAtTime(0, t + 0.025);
+      return new Promise(res => setTimeout(() => {
+        try { fn(); } finally {
+          const t2 = ctx.currentTime;
+          g.cancelScheduledValues(t2); g.setValueAtTime(0, t2); g.linearRampToValueAtTime(cfg.master / 100, t2 + 0.03);
+          res();
+        }
+      }, 40));
     }
     tape$.addEventListener("input", () => { cfg.tape = +tape$.value; tapeO.textContent = cfg.tape; applyAudio(); });
     tape$.addEventListener("change", saveCfg);
@@ -386,13 +401,19 @@
       const M = window.RJ1202;
       A.rj1202 = {
         ready: () => mixer.working,
-        get: () => ({ state: JSON.parse(JSON.stringify(mixer.dev.st)) }),
+        // power: a tecla POWER da mesa (sem o campo, disquete de antes dela: ligada; o padrao sem preferencia e desligada)
+        get: () => ({ state: JSON.parse(JSON.stringify(mixer.dev.st)), power: mixer.powered }),
         set(d) {
           if (!d || !d.state) throw new Error("Nao e um disquete do RJ-1202");
           mixer.dev.applyState(d.state); mixer.dev.saveNow();
+          // disquete de antes da tecla POWER (sem o campo): abre com a mesa LIGADA, como era (o padrao novo, desligada,
+          // so vale para a primeira visita sem preferencia); a barra diz isso
+          const old = typeof d.power !== "boolean";
+          mixer.setPower(old ? true : d.power);
+          if (old) return "RJ-1202: disquete de antes da tecla POWER, a mesa abriu ligada.";
         },
-        empty: () => JSON.stringify(M.sanitize(mixer.dev.st)) === JSON.stringify(M.defaultState()),
-        info: () => mixer.dev.st.ch.map(c => M.SOURCES[M.srcIndex(c.src)].name).join(", ") + (mixer.dev.st.tape > 0.001 ? ", Tape " + mixer.tape100() : ""),
+        empty: () => mixer.powered && JSON.stringify(M.sanitize(mixer.dev.st)) === JSON.stringify(M.defaultState()),
+        info: () => (mixer.powered ? "" : "desligada; ") + mixer.dev.st.ch.map(c => M.SOURCES[M.srcIndex(c.src)].name).join(", ") + (mixer.dev.st.tape > 0.001 ? ", Tape " + mixer.tape100() : ""),
         raw: "rj1202",
       };
     }
@@ -475,7 +496,7 @@
     $("[data-ctrl=salvar]").addEventListener("click", () => {
       try {
         DISKS.forEach(d => need(A[d.id].ready(), d.label));
-        const files = [], index = { format: "dcx-studio-project", version: 1, name: projName, tape: mixerOn ? mixer.tape100() : cfg.tape, saved: new Date().toISOString(), disks: [] };
+        const files = [], index = { format: "dcx-studio-project", version: 1, name: projName, tape: mixerOn ? mixer.tape100() : cfg.tape, mixerPower: mixer ? mixer.powered : undefined, barTape: cfg.tape, saved: new Date().toISOString(), disks: [] };
         DISKS.forEach(d => { files.push({ name: d.file, data: JSON.stringify(wrap(d.id)) }); index.disks.push({ machine: d.id, label: d.label, file: d.file, summary: A[d.id].empty() ? "vazio" : A[d.id].info() }); });
         files.unshift({ name: "projeto.json", data: JSON.stringify(index, null, 1) });
         download(RJ.zip.make(files), slug(projName) + ".zip");
@@ -503,9 +524,13 @@
         if (!jobs.length) throw new Error("O projeto nao tem nenhum disquete.");
         if (DISKS.some(d => stateOf(d.id) === "alterado") && !confirm("Carregar o projeto troca o estado das maquinas. Continuar?")) return;
         const notes = jobs.map(([d, data]) => applyDisk(d.id, data)).filter(Boolean);
-        if (index.tape != null) {
+        if (index.barTape != null) { cfg.tape = clamp(Math.round(+index.barTape || 0), 0, 100); syncUI(); applyAudio(); saveCfg(); }
+        else if (index.tape != null) {
           // com o mixer, o Tape do projeto so vale para zip de antes do mixer (sem o disquete do RJ-1202): vai para o Tape do master do mixer
-          if (mixerOn) { if (!jobs.some(j => j[0].id === "rj1202")) mixer.legacyTape(index.tape); }
+          // (zip com o disquete do RJ-1202 e sem barTape: o tape dele e o da mesa, que ja veio no disquete; nao vai para a
+          // barra, mesmo que a mesa ainda esteja trocando de estado agora - o mixerOn so muda depois do duck)
+          if (mixer && jobs.some(j => j[0].id === "rj1202")) { /* nada */ }
+          else if (mixerOn) mixer.legacyTape(index.tape);
           else { cfg.tape = clamp(Math.round(+index.tape || 0), 0, 100); syncUI(); applyAudio(); saveCfg(); }
         }
         if (index.name) setProjName(index.name);
@@ -515,7 +540,7 @@
     }));
 
     // para o teste e para quem quiser usar de fora
-    RJ.studioProject = { adapters: A, state: stateOf, setName: n => setProjName(n), master: () => master, tape: () => tape, setTape: v => { cfg.tape = clamp(Math.round(+v || 0), 0, 100); syncUI(); applyAudio(); saveCfg(); }, saveDisk, loadDisk };
+    RJ.studioProject = { adapters: A, state: stateOf, setName: n => setProjName(n), master: () => master, duck, tape: () => tape, setTape: v => { cfg.tape = clamp(Math.round(+v || 0), 0, 100); syncUI(); applyAudio(); saveCfg(); }, saveDisk, loadDisk };
     Promise.all([loaded, projReady]).then(() => { syncUI(); updateDot(); });
     refreshDisks();
     // o mapa dos controles da barra e do painel para o MIDI Learn nao existe: ficam de fora dele
