@@ -19,7 +19,8 @@
  * Nada aqui mexe nos aparelhos: so zoom/scale (CSS) nos blocos, larguras das colunas e data-* para o CSS.
  * O js/layout.js antigo (RJ-2000 + 404 lado a lado, com as tentativas de celular) nao e carregado
  * nesta pagina e fica intacto no repositorio; quem quiser a grade antiga troca o <script> no index.html.
- * No console: RJ.studioLayout() refaz a grade; #grid traz data-mode, data-s1, data-s4, data-s12, data-pages, data-spw.
+ * RJ-950: a face (977 x 295) fica com a largura do gabinete do RJ-2000 por um scale uniforme (--r9-scale, data-s950).
+ * No console: RJ.studioLayout() refaz a grade; #grid traz data-mode, data-s1, data-s4, data-s12, data-s950, data-pages, data-spw.
  */
 (function () {
   "use strict";
@@ -97,6 +98,18 @@
       const pg = m12.querySelector(".m12-pages");
       if (pg) pg.querySelectorAll("button[data-p]").forEach(b => b.classList.toggle("on", b.dataset.p === (m12.dataset.page || "A")));
     }
+    // o RJ-950 (face de 977 x 295 do vendor/rj-950): a mesma largura do gabinete do RJ-2000, so por escala uniforme
+    // (um scale, proporcao travada, origem no canto superior esquerdo; nada do layout interno muda). O #r9 tem
+    // aspect-ratio 977/295 (css/layout2.css), entao a altura segue a largura sem vazio nem corte. k = largura do
+    // RJ-2000 / largura da face sem escala (as duas medidas na mesma coluna, com o mesmo zoom: a razao nao depende dele).
+    const r9face = document.querySelector("#r9 .r9-face"), spCase = col1.querySelector(".case");
+    let k950 = 0;
+    if (r9face && spCase) {
+      r9face.style.setProperty("--r9-scale", "1");
+      const fw = r9face.getBoundingClientRect().width, cw = spCase.getBoundingClientRect().width;
+      if (fw > 0 && cw > 0) { k950 = cw / fw; r9face.style.setProperty("--r9-scale", String(k950)); }
+    }
+    grid.dataset.s950 = k950 ? String(Math.round(k950 * 10000) / 10000) : "";
     grid.dataset.s1 = r3(s1); grid.dataset.s4 = s4; grid.dataset.s12 = m12 ? r3(s12) : ""; grid.dataset.spw = mode === "grid" ? spw : "";
     grid.dataset.pages = m12 ? String(!!pages) : "";
   }

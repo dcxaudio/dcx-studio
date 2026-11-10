@@ -10,13 +10,13 @@
   <!-- cada aparelho traz o seu CSS; o comum vem do dcx-core -->
   <link rel="stylesheet" href="vendor/dcx-core/css/base.css">
   <link rel="stylesheet" href="vendor/rj-2000/css/rj2000.css">
-  <link rel="stylesheet" href="vendor/rj-950/css/rj950.css">
+  <link rel="stylesheet" href="vendor/rj-950/css/rj950.css?v=f1">
   <link rel="stylesheet" href="vendor/rj-42/css/rj42.css">
   <!-- o DCX 404 com a face nova (vendor/dcx-404/novo): classes dx-*, nao repete nada das outras -->
   <link rel="stylesheet" href="vendor/dcx-404/novo/css/dcx404-novo.css?v=p1">
-  <link rel="stylesheet" href="css/studio.css?v=p1">
+  <link rel="stylesheet" href="css/studio.css?v=f2">
   <!-- a grade do rack em duas colunas (js/layout2.js) -->
-  <link rel="stylesheet" href="css/layout2.css?v=p1">
+  <link rel="stylesheet" href="css/layout2.css?v=f1">
   <link rel="stylesheet" href="css/bar.css?v=t1">
   <!-- o painel do RJ-1202: por ultimo; as regras emprestadas das outras maquinas ficam dentro de .m12 -->
   <link rel="stylesheet" href="vendor/rj-1202/css/rj1202.css">
@@ -183,104 +183,9 @@
       </footer>
     </div>
 
-    <!-- ===================================================== RJ-950 (rack embaixo do SP) -->
-    <section class="rack" id="r9" aria-label="RJ-950 MIDI Digital Sampler">
-      <div class="rack-ear"><i></i><i></i></div>
-      <div class="r9-face">
-        <div class="r9-brand">
-          <span class="r9-maker">DCX</span>
-          <span class="r9-sub">MIDI Digital Sampler</span>
-        </div>
-
-        <div class="r9-pow">
-          <div class="kc"><button class="r9-power" id="r9-power" aria-label="Power do RJ-950"></button><span class="r9-cap">Power</span></div>
-          <div class="kc"><div class="knob r9-knob-s" id="r9-contrast" role="slider" tabindex="0" aria-label="Contrast"><i></i></div><span class="r9-cap">Contrast</span></div>
-        </div>
-
-        <div class="r9-drive-wrap">
-          <span class="r9-cap">Floppy Disk Drive</span>
-          <button class="r9-drive" id="r9-drive" type="button" aria-label="Disquete: carregar arquivo de audio (clique ou solte o arquivo aqui)">
-            <span class="r9-slot"></span>
-            <span class="r9-drive-row"><i class="r9-busy" id="r9-busy"></i><span class="r9-eject"></span></span>
-          </button>
-        </div>
-
-        <div class="r9-display">
-          <div class="r9-model">RJ-950</div>
-          <div class="r9-lcd-row">
-            <div class="lcd-bezel r9-bezel">
-              <div class="lcd r9-lcd" id="r9-lcd" aria-live="polite">
-                <div class="lcd-row" id="r9-l1"></div>
-                <div class="lcd-row" id="r9-l2"></div>
-              </div>
-            </div>
-            <div class="r9-midi"><i class="led r9-led" id="r9-midi-led"></i><span class="r9-cap">MIDI</span></div>
-          </div>
-        </div>
-
-        <div class="r9-modes">
-            <div class="r9-mode"><span class="r9-t">Play</span><i class="led r9-led" data-r9led="play"></i><button class="r9-btn" data-r9mode="play" aria-label="Play"></button></div>
-            <div class="r9-mode"><span class="r9-t">Rec</span><i class="led r9-led" data-r9led="rec"></i><button class="r9-btn" data-r9mode="rec" aria-label="Rec"></button></div>
-            <div class="r9-mode"><span class="r9-t">Edit<br>Sample</span><i class="led r9-led" data-r9led="sample"></i><button class="r9-btn" data-r9mode="sample" aria-label="Edit Sample"></button></div>
-            <div class="r9-mode"><span class="r9-t">Edit<br>Program</span><i class="led r9-led" data-r9led="program"></i><button class="r9-btn" data-r9mode="program" aria-label="Edit Program"></button></div>
-            <div class="r9-mode"><span class="r9-t">MIDI</span><i class="led r9-led" data-r9led="midi"></i><button class="r9-btn" data-r9mode="midi" aria-label="MIDI"></button></div>
-            <div class="r9-mode"><span class="r9-t">Utility</span><i class="led r9-led" data-r9led="utility"></i><button class="r9-btn" data-r9mode="utility" aria-label="Utility"></button></div>
-            <div class="r9-mode"><span class="r9-t">Disk</span><i class="led r9-led" data-r9led="disk"></i><button class="r9-btn" data-r9mode="disk" aria-label="Disk"></button></div>
-            <div class="r9-mode"><span class="r9-t">Master<br>Tune</span><i class="led r9-led" data-r9led="tune"></i><button class="r9-btn" data-r9mode="tune" aria-label="Master Tune"></button></div>
-        </div>
-
-        <table class="r9-chart" aria-label="Paginas de cada modo">
-          <tr><th>Play</th><td>Sample select &middot; free memory</td></tr>
-          <tr><th>Rec</th><td>Rate &middot; length &middot; threshold</td></tr>
-          <tr><th>Edit Sample</th><td>1 Start/End &middot; 2 Loop &middot; 3 Tune/Level &middot; 4 Filter &middot; 5 Cut group &middot; 6 Envelope</td></tr>
-          <tr><th>Edit Program</th><td>RJ-2000 pad &rarr; sample</td></tr>
-          <tr><th>MIDI</th><td>Receive RJ-2000 pads (notes 36-67)</td></tr>
-          <tr><th>Utility</th><td>1 Copy &middot; 2 Delete &middot; 3 Clear all</td></tr>
-          <tr><th>Disk</th><td>1 Load audio &middot; 2 Save memory &middot; 3 Load memory</td></tr>
-          <tr><th>Master Tune</th><td>&plusmn;50 cents</td></tr>
-        </table>
-
-        <div class="r9-keys">
-            <button class="r9-key" data-r9key="1" aria-label="1">1</button>
-            <button class="r9-key" data-r9key="2" aria-label="2">2</button>
-            <button class="r9-key" data-r9key="3" aria-label="3">3</button>
-            <button class="r9-key r9-fn" data-r9key="left" aria-label="Cursor para a esquerda">&#9664;</button>
-            <button class="r9-key r9-fn" data-r9key="right" aria-label="Cursor para a direita">&#9654;</button>
-            <button class="r9-key" data-r9key="4" aria-label="4">4</button>
-            <button class="r9-key" data-r9key="5" aria-label="5">5</button>
-            <button class="r9-key" data-r9key="6" aria-label="6">6</button>
-            <button class="r9-key r9-fn" data-r9key="up" aria-label="Pagina acima">Page<br>&#9650;</button>
-            <button class="r9-key r9-fn" data-r9key="down" aria-label="Pagina abaixo">Page<br>&#9660;</button>
-            <button class="r9-key" data-r9key="7" aria-label="7">7</button>
-            <button class="r9-key" data-r9key="8" aria-label="8">8</button>
-            <button class="r9-key" data-r9key="9" aria-label="9">9</button>
-            <button class="r9-key r9-fn" data-r9key="on" aria-label="On / mais">On<br>+</button>
-            <button class="r9-key r9-fn" data-r9key="off" aria-label="Off / menos">Off<br>&minus;</button>
-            <button class="r9-key" data-r9key="." aria-label="Ponto">.</button>
-            <button class="r9-key" data-r9key="0" aria-label="0">0</button>
-            <button class="r9-key r9-fn" data-r9key="pb" aria-label="Playback (ouvir o sample)">PB</button>
-            <button class="r9-key r9-ent r9-fn" data-r9key="ent" aria-label="Enter">Ent</button>
-        </div>
-
-        <div class="r9-control-wrap">
-          <div class="knob r9-control" id="r9-control" role="slider" tabindex="0" aria-label="Control (muda o valor no cursor)"><i></i></div>
-          <span class="r9-cap">Control</span>
-        </div>
-
-        <div class="r9-knobs">
-          <div class="kc"><div class="knob r9-knob-s" id="r9-rec" role="slider" tabindex="0" aria-label="Rec Level"><i></i></div><span class="r9-cap">Rec Level</span></div>
-          <div class="kc"><div class="knob r9-knob-s" id="r9-mon" role="slider" tabindex="0" aria-label="Monitor"><i></i></div><span class="r9-cap">Monitor</span></div>
-          <div class="kc"><div class="knob r9-knob-s" id="r9-out" role="slider" tabindex="0" aria-label="Output"><i></i></div><span class="r9-cap">Output</span></div>
-        </div>
-
-        <div class="r9-jacks" aria-hidden="true">
-          <div class="kc"><i class="r9-jack"></i><span class="r9-cap">Mic</span></div>
-          <div class="kc"><i class="r9-jack"></i><span class="r9-cap">Input</span></div>
-          <div class="kc"><i class="r9-jack"></i><span class="r9-cap">Rec/PB<br>Trigger</span></div>
-        </div>
-      </div>
-      <div class="rack-ear"><i></i><i></i></div>
-    </section>
+    <!-- ===================================================== RJ-950 (rack embaixo do SP): o painel vem de vendor/rj-950/index.html
+         (js/face950.js injeta o #r9 de la, antes do s950.build()); aqui fica so a caixa. Sem copia do HTML do 950. -->
+    <section class="rack" id="r9" aria-label="RJ-950 MIDI Digital Sampler"></section>
 
     <section class="rack r42" id="r42" aria-label="RJ-42 Loop Phrase Recorder">
       <div class="rack-ear"><i></i><i></i></div>
@@ -491,6 +396,8 @@
   <script src="js/keyguard.js"></script>
   <!-- a face nova do 404 vem do submodulo (fetch de vendor/dcx-404/novo/index.html): comeca cedo -->
   <script src="js/face404.js?v=p1"></script>
+  <!-- o painel do RJ-950 tambem vem do submodulo (fetch de vendor/rj-950/index.html): comeca cedo -->
+  <script src="js/face950.js?v=f1"></script>
   <script src="vendor/dcx-core/js/dsp.js"></script>
   <script src="vendor/dcx-core/js/decode.js"></script>
   <script src="vendor/dcx-core/js/store.js"></script>
@@ -508,7 +415,7 @@
   <script src="vendor/rj-2000/js/sequencer.js"></script>
   <script src="vendor/rj-2000/js/io.js"></script>
   <!-- os outros aparelhos (na mesma ordem do Studio no rj-2000; o app do SP por ultimo) -->
-  <script src="vendor/rj-950/js/s950.js"></script>
+  <script src="vendor/rj-950/js/s950.js?v=f1"></script>
   <script src="vendor/dcx-core/js/tape.js"></script>
   <script src="vendor/rj-42/js/r42.js"></script>
   <!-- DCX 404 (vendor/dcx-404, main): o motor e o mesmo da pagina estavel; a face nova le #d4 (12 pads x 5 bancos) -->
@@ -532,7 +439,7 @@
   <script src="vendor/rj-1202/js/mixer.js"></script>
   <script src="vendor/rj-1202/js/panel.js"></script>
   <script src="vendor/rj-1202/js/rj1202.js"></script>
-  <script src="js/layout2.js?v=p1"></script>
+  <script src="js/layout2.js?v=f1"></script>
   <script src="js/zip.js"></script>
   <script src="js/select.js?v=t1"></script>
   <script src="js/rj1202-studio.js?v=s1"></script>
@@ -543,6 +450,8 @@
     window.addEventListener("DOMContentLoaded", async () => {
       // a face nova do 404 entra no #d4 antes de montar qualquer aparelho (js/face404.js)
       const face404 = await RJ.face404.ready;
+      // o painel do RJ-950 entra no #r9 antes do s950.build() (js/face950.js)
+      const face950 = await RJ.face950.ready;
       let sp = null;
       const studio = new RJ.Host({
         page: "studio",
@@ -566,7 +475,10 @@
       RJ.studioLearnIds.install(studio.learn, ["d404:"]);
       const d404 = new RJ.D404(view404);
       studio.add("dcx404", d404, { label: "DCX 404", receive: f => d404.receive(f) });
-      sp.build(); s950.build(); r42.build(); d404.build(document.getElementById("d4"));
+      // sem o painel do 950 (vendor/rj-950 faltando): o 950 nao monta nem liga, o resto segue
+      sp.build();
+      if (face950) s950.build(); else s950.boot = async () => {};
+      r42.build(); d404.build(document.getElementById("d4"));
       if (RJ.studioLayout) RJ.studioLayout();
       // o mixer RJ-1202 (js/rj1202-studio.js): null se vendor/rj-1202 nao existe
       let syncRoute = () => {};

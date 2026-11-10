@@ -118,6 +118,10 @@
       try { lim.disconnect(anMaster); } catch (e) { /* ja solto */ }
       zero.disconnect();
       if (muted) { try { await ctx.setSinkId(sinkKeep); } catch (e) { console.warn("teste: a saida nao voltou", e); } }
+      // o teste toca so alguns segundos: termina com o audio suspenso (o Studio do quadro fica calado)
+      // (espera as notas e timers do teste acabarem: um ensure() do motor depois do suspend religaria o contexto)
+      await wait(600);
+      try { await ctx.suspend(); } catch (e) { /* ja fechado */ }
     }
   };
 

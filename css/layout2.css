@@ -20,6 +20,11 @@
    (nada do layout interno muda); a .d4-box tem o tamanho ja escalado (o js poe width/height), sem vazio nem corte */
 .d4-box { flex: none; width: 660px; height: 988px; position: relative; }
 .d4-box > #d4.dx { position: absolute; left: 0; top: 0; transform: scale(var(--d4-scale, 1)); transform-origin: 0 0; }
+/* o RJ-950 (face 977 x 295 do vendor/rj-950): a largura do RJ-2000 so por escala uniforme, origem no canto superior
+   esquerdo (o js poe --r9-scale = largura do gabinete do RJ-2000 / largura da face); o #r9 tem a proporcao da face,
+   entao a caixa e a face escalada, sem vazio nem corte. O RJ-42, logo abaixo, nao muda. */
+#r9.rack { width: 100%; aspect-ratio: 977 / 295; }
+#r9 .r9-face { margin: 0; transform: scale(var(--r9-scale, 1)); transform-origin: 0 0; }
 .dx-missing { display: grid; place-items: center; padding: 24px; }
 .dx-missing-msg { margin: 0; max-width: 40ch; text-align: center; font: 14px/1.5 var(--font); color: #30312f; }
 
