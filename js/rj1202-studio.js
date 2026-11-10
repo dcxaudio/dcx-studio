@@ -13,10 +13,11 @@
  *
  * DCX 404: o Aux 1 do mixer entra no 404 (depois do seletor Source dele, antes do Input Level) e a saida do 404 volta
  * pelo Return 1; quando um canal usa o 404 como fonte, a saida dele vai para esse canal (e nao para o Return 1) e o Aux 1
- * do canal fica travado em zero. A Source do 404 (off, RJ-2000, RJ-950, Mix, Line) continua igual, so que o que ja esta
- * num canal do mixer (RJ-2000 inteiro, RJ-950) nao entra no 404 pela Source: chega pelo Aux 1.
+ * do canal fica travado em zero. A Source do 404 (off, RJ-2000, RJ-950, Mix, Line) traz a maquina mesmo quando ela esta
+ * num canal do mixer (RJ-2000 inteiro, banco A-D, RJ-950): a saida dela sai do canal e entra no 404 (take()), em linha
+ * como sem o mixer. Com a Source em outra coisa, o canal recebe a maquina de novo e o Aux 1 manda para o 404 como antes.
  *
- * Devolve { dev, working, whenWorking, has(src), sync404(), legacyTape(v), onWorking(fn) }.
+ * Devolve { dev, working, whenWorking, has(src), sync404(), take(srcs), legacyTape(v), onWorking(fn) }.
  */
 (function () {
   "use strict";
@@ -121,6 +122,25 @@
       if (!unret && G && !used.has("dcx404")) { unret = studio.route("dcx404", dev.ret1In, { dry: false }); retCtx = ctx; }
     }
 
+    /* -------------------------------------------- Source do 404 em linha */
+
+    // Source do 404 = uma maquina que esta num canal (RJ-2000 inteiro, banco A-D, RJ-950): o "cabo" sai do canal e vai
+    // para o 404 (em linha, como sem o mixer: a maquina passa pelo 404 e volta pelo Return 1, sem soar duplo).
+    // take(lista) recebe os ids do mixer que a Source quer agora; o que saiu da lista volta para o canal.
+    // Toda chamada desliga de novo (o mixer refaz as rotas dos canais ao abrir um projeto ou trocar a fonte).
+    let taken = new Set();
+    const outOf = src => studio.output(BANK_OUT[src] || src);
+    function eachCh(src, fn) {
+      if (!dev.chIn) return;
+      dev.st.ch.forEach((c, i) => { if (c.src === src && dev.chIn[i] && dev.unroute[i]) fn(dev.chIn[i]); });
+    }
+    function take(list) {
+      const want = new Set(working ? list.filter(s => used.has(s)) : []);
+      taken.forEach(s => { if (!want.has(s)) { const out = outOf(s); eachCh(s, n => out.connect(n)); } });
+      taken = want;
+      want.forEach(s => { const out = outOf(s); eachCh(s, n => { try { out.disconnect(n); } catch (e) { /* ja solto */ } }); });
+    }
+
     /* ------------------------------------------------------------ liga */
 
     const boot = dev.boot.bind(dev);
@@ -149,6 +169,7 @@
       onWorking(fn) { if (working) fn(); else waiters.push(fn); },
       has: src => working && used.has(src),
       sync404,
+      take,
       /** Valor de Tape (0 a 100) de um projeto ou configuracao de antes do mixer: passa para o Tape do master do mixer. */
       legacyTape(v) { dev.setTape(Math.max(0, Math.min(100, +v || 0)) / 100); },
       tape100: () => Math.round(dev.st.tape * 100),

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Teste Source 404</title>
+<style>
+  :root { --bg: #f4f2ee; --fg: #1d1d1b; --ok: #2f7d32; --bad: #b3261e; --line: #d6d2ca; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #1b1b1a; --fg: #ecebe7; --ok: #7bc47f; --bad: #f2867c; --line: #3a3936; } }
+  body { margin: 0; padding: 16px; background: var(--bg); color: var(--fg); font: 14px/1.4 system-ui, sans-serif; }
+  button { font: inherit; padding: 6px 14px; }
+  table { border-collapse: collapse; margin: 12px 0; width: 100%; max-width: 760px; }
+  td, th { border-bottom: 1px solid var(--line); padding: 4px 8px; text-align: left; }
+  td.n { text-align: right; font-variant-numeric: tabular-nums; }
+  .ok { color: var(--ok); } .bad { color: var(--bad); }
+  iframe { width: 100%; height: 360px; border: 1px solid var(--line); }
+</style>
+</head>
+<body>
+<h1>Source do DCX 404 no Studio</h1>
+<p>Liga o Studio (no quadro abaixo), toca um pad do RJ-2000 (A1 e C1) e um tom no RJ-950 e mede o pico na entrada do 404 para cada Source.
+Falha se uma Source que deve trazer a maquina mede abaixo de -60 dBFS. O master fica mudo durante o teste. No fim grava o REC do 404 e confere o sample.</p>
+<p><button id="go" type="button" disabled>Rodar o teste</button> <span id="sum"></span></p>
+<table id="out" hidden><thead><tr><th>Caso</th><th>Entrada 404 (dBFS)</th><th>Master (dBFS)</th><th></th></tr></thead><tbody></tbody></table>
+<iframe id="st" src="../index.html" title="DCX Studio"></iframe>
+<script src="source-404.js?v=s1"></script>
+<script>
+  "use strict";
+  const fr = document.getElementById("st"), go = document.getElementById("go"), sum = document.getElementById("sum");
+  const fmt = v => (v === null || v === -Infinity || v === undefined ? "-inf" : v.toFixed(1));
+  fr.addEventListener("load", () => {
+    const t0 = Date.now();
+    const ready = () => { const w = fr.contentWindow; if (w.RJ && w.RJ.studio && w.RJ.d404) go.disabled = false; else if (Date.now() - t0 < 15000) setTimeout(ready, 200); else sum.textContent = "o Studio nao montou"; };
+    ready();
+  });
+  go.addEventListener("click", async () => {
+    go.disabled = true; sum.textContent = "rodando...";
+    const w = fr.contentWindow;
+    try {
+      const r = await RJ.testSource404(w);
+      const tb = document.querySelector("#out tbody");
+      tb.innerHTML = "";
+      r.rows.forEach(x => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${x.name}</td><td class="n">${fmt(x.dbIn)}</td><td class="n">${fmt(x.dbMaster)}</td><td class="${x.ok ? "ok" : "bad"}">${x.ok ? "ok" : "FALHA"}</td>`;
+        tb.appendChild(tr);
+      });
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>REC do 404, Source = RJ-2000 (${r.rec.len} amostras${r.rec.err ? ", " + r.rec.err : ""})</td><td class="n">${fmt(r.rec.db)}</td><td></td><td class="${r.rec.ok ? "ok" : "bad"}">${r.rec.ok ? "ok" : "FALHA"}</td>`;
+      tb.appendChild(tr);
+      document.getElementById("out").hidden = false;
+      sum.textContent = r.ok ? "PASSOU" : "FALHOU";
+      sum.className = r.ok ? "ok" : "bad";
+      document.title = r.ok ? "PASSOU - Teste Source 404" : "FALHOU - Teste Source 404";
+      window.testResult = r;
+    } catch (e) { sum.textContent = "erro: " + e.message; sum.className = "bad"; console.error(e); }
+    go.disabled = false;
+  });
+</script>
+</body>
+</html>

@@ -535,7 +535,7 @@
   <script src="js/layout2.js?v=p1"></script>
   <script src="js/zip.js"></script>
   <script src="js/select.js?v=t1"></script>
-  <script src="js/rj1202-studio.js?v=p1"></script>
+  <script src="js/rj1202-studio.js?v=s1"></script>
   <script src="js/bar.js?v=p1"></script>
   <script>
     // DCX Studio: um host so ("studio"), com o rack completo. Cada aparelho recebe a vista dele.
@@ -576,25 +576,38 @@
       // (dry: false), sem soar duplo. Line, desligado ou o 404 apagado: volta ao normal.
       // Source RJ-950 faz o mesmo com a saida do 950 (entra no 404 pelo no src950 e some do direto);
       // em Mix os dois entram, cada um com o seu envio.
-      // Com o RJ-1202, o que ja esta num canal dele (RJ-2000 inteiro, RJ-950) chega ao 404 pelo Aux 1 do mixer,
-      // nao pela Source: senao tocaria duas vezes. O resto da Source (bancos fora de canal, Line) segue igual.
-      let unroute = null, unroute950 = null, routedCtx = null;
+      // Com o RJ-1202, o que esta num canal dele (RJ-2000 inteiro, banco A-D, RJ-950) tambem vem pela Source: a saida
+      // sai do canal e entra no 404 (mixer.take), em linha, sem soar duplo. Antes a Source pulava essas maquinas e
+      // contava com o Aux 1 do canal (padrao zero): com o mixer padrao (A, B e 950 em canais) o 404 nao ouvia nada.
+      const routes = new Map();   // "saida>no" -> desfaz
+      let routedCtx = null;
       syncRoute = () => {
         const on = studio.on && d404.on && d404.g;
         if (routedCtx && (!on || routedCtx !== d404.g.ctx)) {   // o 404 apagou ou o grafo foi refeito
-          if (unroute) { unroute(); unroute = null; }
-          if (unroute950) { unroute950(); unroute950 = null; }
+          routes.forEach(un => un()); routes.clear();
           routedCtx = null;
         }
         const inMixer = id => !!(mixer && mixer.has(id));
-        const want = !!on && (d404.src === "rj2000" || d404.src === "mix") && !inMixer("rj2000");
-        const want950 = !!on && (d404.src === "rj950" || d404.src === "mix") && !inMixer("rj950");
-        if (want && !unroute) unroute = studio.route("rj2000", "dcx404", { dry: false });
-        else if (!want && unroute) { unroute(); unroute = null; }
-        if (want950 && !unroute950) unroute950 = studio.route("rj950", d404.g.src950, { dry: false });
-        else if (!want950 && unroute950) { unroute950(); unroute950 = null; }
-        if (unroute || unroute950) routedCtx = d404.g.ctx;
-        if (mixer) mixer.sync404();
+        const wantRj = !!on && (d404.src === "rj2000" || d404.src === "mix");
+        const want950 = !!on && (d404.src === "rj950" || d404.src === "mix");
+        const want = new Map();   // chave -> [saida, destino]
+        const take = [];          // ids do mixer que saem do canal
+        if (wantRj) {
+          want.set("rj2000>in", ["rj2000", "dcx404"]);   // o que nao esta num banco roteado (entra pelo host.input)
+          if (inMixer("rj2000")) take.push("rj2000");
+          "ABCD".split("").forEach(B => {
+            const id = "rj2000" + B.toLowerCase();
+            if (inMixer(id)) { want.set("rj2000-" + B + ">rj", ["rj2000-" + B, d404.g.srcRj]); take.push(id); }
+          });
+        }
+        if (want950) {
+          want.set("rj950>950", ["rj950", d404.g.src950]);
+          if (inMixer("rj950")) take.push("rj950");
+        }
+        routes.forEach((un, k) => { if (!want.has(k)) { un(); routes.delete(k); } });
+        want.forEach(([from, to], k) => { if (!routes.has(k)) routes.set(k, studio.route(from, to, { dry: false })); });
+        if (routes.size) routedCtx = d404.g.ctx;
+        if (mixer) { mixer.take(take); mixer.sync404(); }
       };
       const applyInput = d404.applyInput.bind(d404);
       d404.applyInput = () => { applyInput(); syncRoute(); };
