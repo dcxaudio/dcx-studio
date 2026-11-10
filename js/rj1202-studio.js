@@ -17,13 +17,28 @@
  * num canal do mixer (RJ-2000 inteiro, banco A-D, RJ-950): a saida dela sai do canal e entra no 404 (take()), em linha
  * como sem o mixer. Com a Source em outra coisa, o canal recebe a maquina de novo e o Aux 1 manda para o 404 como antes.
  *
- * Devolve { dev, working, whenWorking, has(src), sync404(), take(srcs), legacyTape(v), onWorking(fn) }.
+ * POWER (tecla do Studio no canto da mesa, ao lado do LED Power do painel): desligada, o Studio funciona SEM a mesa,
+ * como antes dela: nenhum canal pega fonte (cada maquina volta ao master direto), o RJ-42 sai do directIn, o Aux 1 nao
+ * vai ao 404 e o 404 nao volta pelo Return 1 (sai direto), os bancos do RJ-2000 voltam ao "inteiro", o microfone fecha
+ * e o Main do mixer fica em zero. has() devolve false, entao a Source do 404 pega RJ-2000/RJ-950 direto. O estado dos
+ * canais (fontes, aux, faders...) fica guardado e volta igual ao religar. Padrao: DESLIGADA (decisao de Igor: sem
+ * preferencia salva no navegador, a primeira visita abre sem a mesa). A troca abaixa o master por
+ * ~30 ms (RJ.studioProject.duck, js/bar.js) para nao estalar. Preferencia em localStorage (PWR_KEY); o projeto leva
+ * { power } no disquete do RJ-1202 (js/bar.js); disquete de antes da tecla (sem power) abre com a mesa LIGADA.
+ *
+ * Devolve { dev, working, whenWorking, has(src), sync404(), take(srcs), legacyTape(v), onWorking(fn),
+ *           powered, setPower(on) (Promise), onPower(fn) }.
  */
 (function () {
   "use strict";
   window.RJ = window.RJ || {};
 
   const BANK_OUT = { rj2000a: "rj2000-A", rj2000b: "rj2000-B", rj2000c: "rj2000-C", rj2000d: "rj2000-D" };
+  const PWR_KEY = "dcx-studio/rj1202-power";
+  const SILENT = /[?&]silent\b/.test(location.search);   // o mesmo gancho de teste do vendor/rj-1202
+  // padrao DESLIGADA: so liga se a preferencia salva for "1" (sem preferencia ou sem armazenamento: desligada)
+  const readPwr = () => { try { return localStorage.getItem(PWR_KEY) === "1"; } catch (e) { return false; } };
+  const savePwr = on => { try { localStorage.setItem(PWR_KEY, on ? "1" : "0"); } catch (e) { /* sem armazenamento */ } };
 
   RJ.studioMixer = function (m) {
     const { studio, sp, d404 } = m;
@@ -32,6 +47,9 @@
 
     let used = new Set();
     let working = false;
+    let powered = readPwr();     // o que a tecla POWER mostra (e o que fica salvo)
+    let live = powered;          // o que o grafo faz agora (segue powered depois do duck)
+    const pwrFns = [];
     const waiters = [];
     let resolveWork;
     const whenWorking = new Promise(r => { resolveWork = r; });
@@ -43,6 +61,13 @@
       onSources: s => changed(s),
     });
     studio.add("rj1202", dev, { label: "RJ-1202" });
+    // mesa desligada: o canal nao pega a fonte (a maquina fica no master direto); o estado do canal fica guardado
+    const routeCh = dev.routeChannel.bind(dev);
+    dev.routeChannel = function (ch) {
+      if (live) return routeCh(ch);
+      if (this.unroute[ch]) { this.unroute[ch](); this.unroute[ch] = null; }
+      if (this.ready) this.sourcesChanged();
+    };
     slot.hidden = false;
     const root = RJ.m12Panel(slot.querySelector("#m12-mount"));
     dev.build(root);
@@ -64,6 +89,16 @@
     if (topbar) topbar.insertBefore(pg, topbar.querySelector(".m12-sp"));
     if (RJ.studioLayout) RJ.studioLayout();
 
+    // tecla POWER: entra ao lado do LED Power que o painel ja tem (.m12-pwr), no mesmo estilo das teclas dele
+    const pwrBox = root.querySelector(".m12-pwr");
+    const pwrBtn = document.createElement("button");
+    pwrBtn.type = "button";
+    pwrBtn.className = "r9-btn m12-pwr-key";
+    pwrBtn.dataset.ctrl = "m12-power";
+    pwrBtn.title = "Liga e desliga a mesa (desligada, as maquinas vao direto ao master)";
+    if (pwrBox) { pwrBox.classList.add("m12-pwr-st"); pwrBox.appendChild(pwrBtn); }
+    pwrBtn.addEventListener("click", () => setPower(!powered));
+
     // o Learn do painel abre a mesma pagina do SET-UP 22 do RJ-2000 que o botao MIDI Learn da config
     dev.learnBtn.addEventListener("click", () => {
       if (!studio.on) return;
@@ -75,7 +110,7 @@
 
     function changed(s) {
       used = s;
-      for (let b = 0; b < 4; b++) sp.engine.setBankRouted(b, s.has("rj2000" + "abcd"[b]));
+      for (let b = 0; b < 4; b++) sp.engine.setBankRouted(b, live && s.has("rj2000" + "abcd"[b]));
       syncLine();
       sync404();
       if (m.onChange) m.onChange();
@@ -92,17 +127,18 @@
       return userLine;
     }
     async function syncLine() {
-      const want = used.has("line");
+      const want = live && used.has("line");
       if (!want && mic) { try { mic.stream.getTracks().forEach(t => t.stop()); mic.node.disconnect(); } catch (e) { /* ja fechou */ } mic = null; return; }
-      if (!want || mic || micBusy || !working || !(await micAllowed())) return;
-      micBusy = true;
+      if (!want || mic || micBusy || !working) return;
+      micBusy = true;      // antes do await: varias chamadas seguidas (religar a mesa refaz os 5 canais) abrem um microfone so
       try {
+        if (!(await micAllowed())) { micBusy = false; return; }
         const ctx = studio.engine.ensure();
         const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
         const node = ctx.createMediaStreamSource(stream);
         node.connect(studio.output("line"));
         mic = { stream, node };
-        if (!used.has("line")) syncLine();      // mudou de ideia enquanto o navegador perguntava
+        if (!live || !used.has("line")) syncLine();      // mudou de ideia (ou desligou a mesa) enquanto o navegador perguntava
       } catch (e) { console.warn("Line In do RJ-1202 nao abriu", e); dev.show("Err", "Line: a entrada nao abriu"); }
       micBusy = false;
     }
@@ -112,13 +148,13 @@
     let auxG = null, unret = null, retCtx = null, un42 = null;
     function sync404() {
       if (!working) return;
-      const G = studio.on && d404.on && d404.g ? d404.g : null;
+      const G = live && studio.on && d404.on && d404.g ? d404.g : null;
       // Aux 1 -> 404
       if (auxG && auxG !== G) { try { dev.aux1.disconnect(auxG.inLevel); } catch (e) { /* ja solto */ } auxG = null; }
       if (G && !auxG) { dev.aux1.connect(G.inLevel); auxG = G; }
       // 404 -> Return 1, a menos que um canal use o 404 como fonte (a saida dele ja vai para esse canal)
       const ctx = studio.engine.ctx;
-      if (unret && (retCtx !== ctx || used.has("dcx404"))) { unret(); unret = null; }
+      if (unret && (!live || retCtx !== ctx || used.has("dcx404"))) { unret(); unret = null; }
       if (!unret && G && !used.has("dcx404")) { unret = studio.route("dcx404", dev.ret1In, { dry: false }); retCtx = ctx; }
     }
 
@@ -141,6 +177,48 @@
       want.forEach(s => { const out = outOf(s); eachCh(s, n => { try { out.disconnect(n); } catch (e) { /* ja solto */ } }); });
     }
 
+    /* ------------------------------------------------------------ POWER da mesa */
+
+    function paintPwr() {
+      pwrBtn.classList.toggle("on", powered);
+      pwrBtn.setAttribute("aria-pressed", powered ? "true" : "false");
+      pwrBtn.setAttribute("aria-label", "Power do RJ-1202: " + (powered ? "ligada" : "desligada"));
+      if (dev.leds && dev.leds.power) dev.leds.power.classList.toggle("on", powered);
+      root.classList.toggle("m12-off", !powered);
+    }
+    const gate = v => { if (dev.mainGate) dev.mainGate.gain.setTargetAtTime(SILENT ? 0 : v, studio.engine.ctx.currentTime, 0.004); };
+    // poe o grafo no estado de powered (idempotente: varios cliques seguidos terminam no ultimo)
+    function applyPower() {
+      if (!dev.chIn || live === powered) { live = powered; return; }
+      live = powered;
+      if (live) {
+        gate(1);
+        if (!un42) un42 = studio.route("rj42", dev.directIn, { dry: false });
+        dev.st.ch.forEach((_, i) => routeCh(i));
+      } else {
+        take([]);
+        dev.st.ch.forEach((_, i) => { if (dev.unroute[i]) { dev.unroute[i](); dev.unroute[i] = null; } });
+        if (un42) { un42(); un42 = null; }
+        gate(0);
+      }
+      if (working) changed(dev.usedSources());
+    }
+    function setPower(on) {
+      on = !!on;
+      if (on !== powered) { powered = on; savePwr(on); }
+      paintPwr();
+      if (!dev.chIn) live = powered;           // ainda nao ligou: o boot ja monta no estado certo
+      if (dev.chIn && live !== powered) {
+        dev.show(powered ? "On" : "OFF", powered ? "Mesa ligada" : "Mesa desligada: as maquinas vao direto ao master");
+        const P = RJ.studioProject;
+        const p = P && P.duck ? P.duck(applyPower) : Promise.resolve(applyPower());
+        return p.then(() => { pwrFns.forEach(fn => { try { fn(powered); } catch (e) { console.warn(e); } }); });
+      }
+      pwrFns.forEach(fn => { try { fn(powered); } catch (e) { console.warn(e); } });
+      return Promise.resolve();
+    }
+    paintPwr();
+
     /* ------------------------------------------------------------ liga */
 
     const boot = dev.boot.bind(dev);
@@ -151,7 +229,9 @@
         armed = true;
         p.then(() => {
           // RJ-42: sem canal, direto no master do mixer
-          un42 = studio.route("rj42", dev.directIn, { dry: false });
+          if (!live) gate(0);
+          else if (!un42) un42 = studio.route("rj42", dev.directIn, { dry: false });
+          paintPwr();
           working = true;
           changed(dev.usedSources());
           waiters.forEach(fn => { try { fn(); } catch (e) { console.warn(e); } });
@@ -167,7 +247,10 @@
       get working() { return working; },
       whenWorking,
       onWorking(fn) { if (working) fn(); else waiters.push(fn); },
-      has: src => working && used.has(src),
+      has: src => working && live && used.has(src),
+      get powered() { return powered; },
+      setPower,
+      onPower(fn) { pwrFns.push(fn); },
       sync404,
       take,
       /** Valor de Tape (0 a 100) de um projeto ou configuracao de antes do mixer: passa para o Tape do master do mixer. */
