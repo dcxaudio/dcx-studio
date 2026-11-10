@@ -12,22 +12,3 @@
 .m12 .r9-btn.m12-pwr-key { width: 32px; height: 20px; margin-left: 2px; cursor: pointer; }
 .m12 .r9-btn.m12-pwr-key:focus-visible { outline: 2px solid #e8a33d; outline-offset: 2px; }
 .m12.m12-off .m12-main { filter: brightness(.82); }
-
-/* RJ-950: o painel vem de vendor/rj-950 (js/face950.js) e e desenhado so pelo css/rj950.css dele. Mas o
- * vendor/rj-42/css/rj42.css (carregado depois) traz regras soltas com as classes r9-* (.r9-sub, .r9-power,
- * .rack.on .r9-power, .r9-btn.down, .r9-drive, .r9-bezel, .r9-maker...), do tempo em que o 42 dividia o visual
- * com o 950 antigo. Na pagina do 950 sozinha o rj42.css nao entra; aqui ele vazava para o #r9 (subtitulo claro,
- * POWER maior e fora do lugar, botao de modo pulando ao apertar). Estas regras desfazem SO o que vaza, dentro
- * do #r9; o RJ-42 nao muda. Quando o rj-42 escopar essas regras (.r42), este bloco pode sair.
- * Os valores de sombra/transform abaixo repetem os do rj950.css (.r9-face .r9-power, .r9-btn e .r9-lcd). */
-#r9 .r9-face .r9-sub { color: inherit; letter-spacing: .01em; }
-#r9 .r9-face .r9-maker { line-height: normal; transform: none; transform-origin: 50% 50%; }
-#r9 .r9-face .r9-power { width: auto; height: auto; transform: none; }
-#r9.on .r9-face .r9-power { box-shadow: 0 1px 1px rgba(0,0,0,.35), inset 0 .5px 0 rgba(255,255,255,.12); }
-#r9 .r9-face .r9-btn { transition: none; }
-#r9 .r9-face .r9-btn.down { transform: translate(-50%, -50%); box-shadow: 0 0 0 1px #2b2b2a, 0 calc(1.5 * var(--u)) 0 0 rgba(255,255,255,.6); }
-#r9 .r9-face .r9-drive { flex-direction: row; justify-content: normal; gap: normal; }
-#r9 .r9-face .r9-drive-row { justify-content: normal; align-items: normal; }
-#r9 .r9-face .r9-bezel { flex: 0 1 auto; }
-#r9 .r9-face .r9-lcd .lcd-row { row-gap: 1px; }
-#r9:not(.on) .r9-face .r9-lcd { box-shadow: inset 0 0 0 1px rgba(0,0,0,.6), inset 0 calc(2 * var(--u)) calc(4 * var(--u)) rgba(0,0,0,.45), inset 0 -1px calc(2 * var(--u)) rgba(0,0,0,.3); }
