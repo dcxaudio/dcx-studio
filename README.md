@@ -54,3 +54,10 @@ Para atualizar um aparelho: `git -C vendor/rj-950 fetch && git -C vendor/rj-950 
 ## Licença
 
 GPL-3.0 ([LICENSE](LICENSE)).
+
+
+---
+
+Projeto independente, sem vínculo com os fabricantes dos equipamentos que inspiraram as máquinas. Os nomes SP-1200, SP-404, S950 e 1202 pertencem a seus donos e aparecem só em texto, como referência.
+
+*Independent project, not affiliated with the makers of the gear that inspired the machines; names belong to their owners and appear as text only, for reference.*
