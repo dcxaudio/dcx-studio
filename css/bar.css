@@ -49,6 +49,12 @@ body { padding-bottom: calc(var(--bar-h) + 8px + env(safe-area-inset-bottom)); }
 
 .cfg-btn { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--bar-line); background: transparent; display: grid; place-items: center; flex: none; color: var(--bar-ink); }
 .cfg-btn svg { width: 18px; height: 18px; }
+/* "?" = o guia rapido (guia/index.html), em nova aba; mesmo circulo da engrenagem */
+.help-btn { text-decoration: none; font-size: 17px; font-weight: 600; line-height: 1; }
+.help-btn:hover { border-color: var(--bar-ink); }
+.sbar a:focus-visible { outline: 2px solid var(--rule); outline-offset: 2px; }
+/* tela LIGAR: aviso de celular e dica da mesa, discretos, abaixo do "Toque para ligar o som" */
+.power-note { margin: 0; max-width: 340px; padding: 0 16px; text-align: center; color: #9a9a9a; font-size: 12px; line-height: 1.45; }
 .cfg-btn[aria-expanded="true"] { background: var(--bar-ink); color: var(--bar); border-color: var(--bar-ink); }
 
 /* ================= painel de config ================= */

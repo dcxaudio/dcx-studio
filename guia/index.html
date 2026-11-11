@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DCX Studio: guia rápido</title>
+<style>
+:root{--bg:#1c1c1c;--panel:#262626;--line:#3a3a3a;--text:#e6e6e6;--mute:#a8a8a8;--silver:#c9ccd1;--hi:#f2f3f5}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+main{max-width:46rem;margin:0 auto;padding:20px 16px 48px}
+header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+h1{margin:0;font-size:1.6rem;color:var(--hi);letter-spacing:.01em}
+h2{margin:28px 0 8px;font-size:1.05rem;color:var(--hi);border-bottom:1px solid var(--line);padding-bottom:6px}
+p,ul,ol{margin:8px 0}
+ul,ol{padding-left:1.3rem}
+li{margin:4px 0}
+a{color:var(--silver)}
+b,strong{color:var(--hi)}
+code,kbd{font:.9em ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:0 5px;color:var(--hi)}
+.lang{display:flex;gap:6px}
+.lang button{font:inherit;font-size:.85rem;color:var(--silver);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:4px 12px;cursor:pointer}
+.lang button[aria-pressed="true"]{background:var(--silver);color:var(--bg);border-color:var(--silver)}
+.note{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--silver);border-radius:6px;padding:10px 12px;margin:14px 0}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;margin:8px 0}
+th,td{text-align:left;padding:6px 10px;border:1px solid var(--line);font-size:.95rem}
+th{background:var(--panel);color:var(--hi)}
+.back{margin-top:32px;font-size:.9rem;color:var(--mute)}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1>DCX Studio: guia rápido</h1>
+  <div class="lang" role="group" aria-label="Idioma / Language">
+    <button type="button" id="b-pt" aria-pressed="true">PT</button>
+    <button type="button" id="b-en" aria-pressed="false">EN</button>
+  </div>
+</header>
+
+<!-- ============ PT ============ -->
+<div id="pt" lang="pt-BR">
+<p>O DCX Studio é um estúdio inteiro no navegador: quatro máquinas (RJ-2000, DCX 404, RJ-950 e RJ-42) e uma mesa (RJ-1202). Uma toca para a outra.</p>
+
+<div class="note"><b>No celular o navegador atrasa o som e não é indicado; use no computador.</b> Funciona melhor no computador: no celular o navegador pode atrasar o som (em alguns Androids passa de 100 ms, e o fone Bluetooth piora), então não recomendamos para tocar ao vivo; estudamos um app para celular, sem data.</div>
+
+<h2>1. Ligar</h2>
+<p>Aperte o botão <b>LIGAR</b> no meio da tela. O som só começa depois desse primeiro clique (regra do navegador).</p>
+<p>A mesa <b>RJ-1202 vem desligada</b>: com ela assim, cada máquina vai direto para a saída. Para usar a mesa, aperte o <b>Power</b> dela.</p>
+
+<h2>2. Carregar sons nos pads do 404</h2>
+<ul>
+  <li><b>Arraste um arquivo de áudio e solte em cima de um pad.</b> Aceita WAV, MP3, AIFF, OGG e FLAC. O som entra naquele pad do banco que está aberto (A a E).</li>
+  <li>Sem mouse para arrastar: segure <kbd>Shift</kbd> no teclado e toque o pad; abre a janela para escolher o arquivo.</li>
+  <li>Arquivo solto fora dos pads vai para o primeiro pad vazio. Se aparecer <code>FUL</code>, não há pad vazio.</li>
+  <li>O 404 corta o silêncio do começo do arquivo e avisa na barra de baixo.</li>
+</ul>
+
+<h2>3. Source: quem chega ao 404 e à mesa</h2>
+<p>O botão <b>SOURCE</b> do 404 escolhe o que entra nele (para passar pelos efeitos dele). Cada aperto troca; o visor mostra:</p>
+<div class="tbl"><table>
+<tr><th>Visor</th><th>Entrada</th></tr>
+<tr><td><code>oFF</code></td><td>desligada (ao abrir)</td></tr>
+<tr><td><code>r.20</code></td><td>o RJ-2000</td></tr>
+<tr><td><code>950</code></td><td>o RJ-950</td></tr>
+<tr><td><code>MiX</code></td><td>RJ-2000 e RJ-950 juntos</td></tr>
+<tr><td><code>Lin</code></td><td>a entrada de áudio do computador (o navegador pede permissão na primeira vez)</td></tr>
+</table></div>
+<p>Com SOURCE aceso, <b>START/END/LEVEL</b> + <b>Ctrl 3</b> ajusta o nível da fonte mostrada.</p>
+<p><b>O RJ-42 não é fonte do 404.</b> Ele manda os loops para um pad do RJ-2000 ou para o RJ-950.</p>
+<p><b>Na mesa RJ-1202</b> (ligada pelo Power dela) cada canal escolhe a fonte: RJ-2000 inteiro ou banco A, B, C ou D, RJ-950, DCX 404 e Line. O RJ-42 não tem canal e entra direto no master. O 404 usa a mesa como efeito: Aux 1 → 404 → Return 1.</p>
+
+<h2>4. Tocar e gravar, e as outras máquinas</h2>
+<ul>
+  <li><b>404, tocar:</b> clique nos pads ou use <kbd>1</kbd>–<kbd>4</kbd>, <kbd>Q</kbd>–<kbd>R</kbd>, <kbd>A</kbd>–<kbd>F</kbd> (com o 404 selecionado).</li>
+  <li><b>404, gravar um pattern:</b> <b>PATTERN SELECT</b>, depois <b>REC</b>, escolha o banco e o pad de destino e toque. <b>REC</b> de novo dá a contagem de 1 compasso e começa a gravar em loop. <b>CANCEL</b> para e salva. Para tocar: PATTERN SELECT e toque um pad que pisca. O BPM é o do 404, e acompanha o do RJ-2000 enquanto o sequenciador dele toca.</li>
+  <li><b>RJ-2000:</b> o sampler e sequenciador. <b>Record/Edit</b>, depois <b>Run/Stop</b>, e toque os pads.</li>
+  <li><b>RJ-950:</b> solte um WAV ou MP3 no drive; ele toca junto, pelos pads do RJ-2000.</li>
+  <li><b>RJ-42:</b> solte uma música no disco, ele acha o BPM; marque o loop (1, 2, 4 ou 8 compassos) e mande para um pad do RJ-2000 ou para o RJ-950.</li>
+</ul>
+
+<h2>5. Teclado e MIDI</h2>
+<ul>
+  <li><b>Teclado do computador:</b> toca a máquina selecionada (o 404 com as teclas acima, o RJ-2000 com as dele).</li>
+  <li><b>MIDI</b> (Chrome, Edge ou Opera): na engrenagem (<b>Configurações</b>, barra de baixo), <b>Ligar MIDI</b>. Notas 36 a 67 tocam o RJ-2000.</li>
+  <li><b>MIDI Learn</b> (engrenagem → MIDI Learn): toque num controle da tela, mexa no seu controlador e aperte <kbd>Enter</kbd>. <kbd>Delete</kbd> apaga, <kbd>Esc</kbd> sai. <b>Salvar mapa</b> guarda tudo.</li>
+</ul>
+
+<h2>6. Salvar</h2>
+<p>O Studio guarda sozinho no navegador (volta ao recarregar; limpar os dados do site apaga). Para guardar de verdade: engrenagem → <b>Salvar projeto</b> baixa um <code>.zip</code> com um <b>disquete</b> por máquina (RJ-2000, RJ-950, RJ-42, DCX 404 e a mesa). <b>Carregar projeto</b> devolve tudo. Cada máquina também tem <b>Salvar</b> e <b>Carregar</b> só para ela (um <code>.json</code>). O nome do projeto fica na barra (clique nele).</p>
+</div>
+
+<!-- ============ EN ============ -->
+<div id="en" lang="en" hidden>
+<p><b>DCX Studio</b> puts four machines (RJ-2000, DCX 404, RJ-950, RJ-42) and a mixer (RJ-1202) in one browser rack. They play into each other.</p>
+
+<div class="note"><b>On phones the browser adds audio delay, so we recommend a computer.</b> On phones the browser can delay the sound (over 100 ms on some Android devices, worse with Bluetooth headphones), so we don't recommend it for playing live; a phone app is being studied, no date.</div>
+
+<h2>1. Power on</h2>
+<p>Press <b>LIGAR</b> in the middle of the screen. Audio starts at that first click (a browser rule).</p>
+<p>The <b>RJ-1202 mixer starts off</b>: each machine then goes straight to the output. Press the mixer's <b>Power</b> to use it.</p>
+
+<h2>2. Load sounds into 404 pads</h2>
+<ul>
+  <li><b>Drag an audio file onto a pad.</b> WAV, MP3, AIFF, OGG and FLAC work. The sound goes into that pad of the open bank (A to E).</li>
+  <li>No drag? Hold <kbd>Shift</kbd> and tap a pad to pick a file.</li>
+  <li>A file dropped outside the pads goes to the first empty pad. <code>FUL</code> means no empty pad.</li>
+  <li>The 404 trims leading silence and says so in the bottom bar.</li>
+</ul>
+
+<h2>3. Source: what feeds the 404 and the mixer</h2>
+<p>The 404's <b>SOURCE</b> button picks what goes into it (through its effects). Each press cycles; the display shows:</p>
+<div class="tbl"><table>
+<tr><th>Display</th><th>Input</th></tr>
+<tr><td><code>oFF</code></td><td>off (default)</td></tr>
+<tr><td><code>r.20</code></td><td>the RJ-2000</td></tr>
+<tr><td><code>950</code></td><td>the RJ-950</td></tr>
+<tr><td><code>MiX</code></td><td>RJ-2000 and RJ-950 together</td></tr>
+<tr><td><code>Lin</code></td><td>the computer's audio input (the browser asks permission the first time)</td></tr>
+</table></div>
+<p><b>The RJ-42 is not a 404 source.</b> It sends loops to an RJ-2000 pad or to the RJ-950.</p>
+<p><b>On the mixer</b> (switch its Power on) each channel picks a source: RJ-2000 (whole or bank A–D), RJ-950, DCX 404, Line. The RJ-42 has no channel and goes straight to master. The 404 uses the mixer as an effect: Aux 1 → 404 → Return 1.</p>
+
+<h2>4. Play and record</h2>
+<ul>
+  <li><b>404 pattern:</b> PATTERN SELECT, REC, pick bank and pad, play; REC again gives a 1-bar count-in and loops; CANCEL saves.</li>
+  <li><b>RJ-2000:</b> Record/Edit, then Run/Stop, play the pads.</li>
+  <li><b>RJ-950:</b> drop a WAV or MP3 on the drive; it plays through the RJ-2000 pads.</li>
+  <li><b>RJ-42:</b> drop a song on the disc, it finds the BPM; mark a loop and send it to an RJ-2000 pad or the RJ-950.</li>
+</ul>
+
+<h2>5. Keyboard and MIDI</h2>
+<p>The computer keyboard plays the selected machine. Gear icon: <b>Ligar MIDI</b> (Chrome, Edge, Opera), then <b>MIDI Learn</b>: tap a control, move yours, press <kbd>Enter</kbd>.</p>
+
+<h2>6. Save</h2>
+<p>The browser autosaves. Gear icon: <b>Salvar projeto</b> downloads a <code>.zip</code> with one floppy per machine; <b>Carregar projeto</b> restores it.</p>
+</div>
+
+<p class="back">DCX Audio · <a href="https://dcxaudio.github.io/dcx-studio/">dcxaudio.github.io/dcx-studio</a></p>
+</main>
+<script>
+(function(){
+  var pt=document.getElementById('pt'),en=document.getElementById('en'),
+      bp=document.getElementById('b-pt'),be=document.getElementById('b-en');
+  function set(l){
+    var e=l==='en';
+    pt.hidden=e;en.hidden=!e;
+    bp.setAttribute('aria-pressed',String(!e));be.setAttribute('aria-pressed',String(e));
+    document.documentElement.lang=e?'en':'pt-BR';
+    document.title=e?'DCX Studio: quick guide':'DCX Studio: guia rápido';
+  }
+  bp.onclick=function(){set('pt')};be.onclick=function(){set('en')};
+  if(/^#en$/.test(location.hash))set('en');
+})();
+</script>
+</body>
+</html>

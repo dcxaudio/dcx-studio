@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="css/studio.css?v=m2">
   <!-- a grade do rack em duas colunas (js/layout2.js) -->
   <link rel="stylesheet" href="css/layout2.css?v=f1">
-  <link rel="stylesheet" href="css/bar.css?v=t1">
+  <link rel="stylesheet" href="css/bar.css?v=h1">
   <!-- o painel do RJ-1202: por ultimo; as regras emprestadas das outras maquinas ficam dentro de .m12 -->
   <link rel="stylesheet" href="vendor/rj-1202/css/rj1202.css">
 </head>
@@ -28,6 +28,9 @@
       <span class="power-label">LIGAR</span>
     </button>
     <p class="power-hint">DCX Studio &middot; DCX Audio<br>Toque para ligar o som</p>
+    <!-- aviso de celular e dica da mesa (css/bar.css .power-note); o guia completo fica no botao "?" da barra -->
+    <p class="power-note"><span lang="pt-BR">No celular o navegador atrasa o som e não é indicado; use no computador.</span><br><span lang="en">On phones the browser adds audio delay, so we recommend a computer.</span></p>
+    <p class="power-note">A mesa RJ-1202 vem desligada: aperte o Power dela para usar.</p>
   </div>
 
   <main class="unit">
@@ -382,6 +385,7 @@
     <span class="sp"></span>
     <label class="tape" title="Fita no master: satura toda a mistura. 0 = som igual"><span class="lbl">Tape</span><input id="bar-tape" data-ctrl="tape" type="range" min="0" max="100" value="0" aria-label="Tape (fita no master)"><output id="bar-tape-o">0</output></label>
     <div class="vu" data-ctrl="vu" aria-label="Nivel de saida" role="img"><div class="row"><b>L</b></div><div class="row"><b>R</b></div></div>
+    <a class="cfg-btn help-btn" id="help-btn" href="guia/" target="_blank" rel="noopener" title="Ajuda: guia rápido" aria-label="Ajuda: guia rápido (abre em nova aba)">?</a>
     <button class="cfg-btn" id="cfg-btn" type="button" data-ctrl="config" aria-expanded="false" aria-controls="cfg" aria-label="Configuracoes">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg>
     </button>
